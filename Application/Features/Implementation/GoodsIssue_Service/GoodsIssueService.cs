@@ -531,7 +531,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                     .Include(i => i.Product)
                     .Include(i => i.Warehouse)
                     .Include(i => i.Customer)
-                    .Where(i => i.InvoiceNumber.ToLower().Contains(keyword) ||
+                    .Where(i => (i.InvoiceNumber != null && i.InvoiceNumber.ToLower().Contains(keyword)) ||
                                 (i.Product != null && i.Product.Name.ToLower().Contains(keyword)) ||
                                 (i.Customer != null && i.Customer.Name.ToLower().Contains(keyword)))
                     .Where(i=>i.Status==0)
@@ -590,7 +590,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                     .Include(i => i.Product)
                     .Include(i => i.Warehouse)
                     .Include(i => i.Customer)
-                    .Where(i => i.InvoiceNumber.ToLower().Contains(keyword) ||
+                    .Where(i => (i.InvoiceNumber != null && i.InvoiceNumber.ToLower().Contains(keyword)) ||
                                 (i.Product != null && i.Product.Name.ToLower().Contains(keyword)) ||
                                 (i.Customer != null && i.Customer.Name.ToLower().Contains(keyword)))
                     .Where(i => i.Status == 1)
@@ -654,7 +654,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                     .Include(i => i.Customer)
                     .Include(i => i.Warehouse)
                     .Where(i => i.Status == 0 && (
-                        i.InvoiceNumber.ToLower().Contains(keyword) ||
+                        (i.InvoiceNumber != null && i.InvoiceNumber.ToLower().Contains(keyword)) ||
                         (i.Product != null && i.Product.Name.ToLower().Contains(keyword)) ||
                         (i.Customer != null && i.Customer.Name.ToLower().Contains(keyword))))
                     .OrderByDescending(i => i.IssueDate)

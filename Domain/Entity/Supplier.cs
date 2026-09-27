@@ -10,15 +10,15 @@ namespace Domain.Entity
 
         [Required]
         [MaxLength(200)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [MaxLength(20)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [MaxLength(300)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [MaxLength(50)]
-        public string EconomicCode { get; set; }
+        public string? EconomicCode { get; set; }
     }
 }

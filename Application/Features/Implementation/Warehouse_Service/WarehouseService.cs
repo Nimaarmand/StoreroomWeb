@@ -65,7 +65,7 @@ namespace Application.Features.Implementation.Warehouse_Service
                 return await GetAllAsync();
             keyword = keyword.Trim();
             return await _warehouseRepo.FindAsync(w =>
-                w.Name.Contains(keyword) || w.Location.Contains(keyword));
+                w.Name.Contains(keyword) || (w.Location != null && w.Location.Contains(keyword)));
         }
 
         public async Task<IEnumerable<Warehouse>> GetTopAsync(int count)

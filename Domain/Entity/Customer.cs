@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Domain.Entity
 {
@@ -11,14 +10,16 @@ namespace Domain.Entity
 
         [Required]
         [MaxLength(200)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [MaxLength(20)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [MaxLength(300)]
-        public string Address { get; set; }
-        public string MarketName { get; set; }
+        public string? Address { get; set; }
+
+        public string? MarketName { get; set; }
+
         public DateTime Creationdate { get; set; } = DateTime.Now;
     }
 }

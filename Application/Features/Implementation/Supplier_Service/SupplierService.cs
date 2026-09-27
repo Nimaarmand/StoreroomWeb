@@ -72,8 +72,8 @@ namespace Application.Features.Implementation.Supplier_Service
             {
                 return await _dbSet
                     .Where(s => s.Name.Contains(keyword) ||
-                                s.Phone.Contains(keyword) ||
-                                s.Address.Contains(keyword))
+                                (s.Phone != null && s.Phone.Contains(keyword)) ||
+                                (s.Address != null && s.Address.Contains(keyword)))
                     .ToListAsync();
             }
             finally
