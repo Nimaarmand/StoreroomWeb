@@ -1,13 +1,14 @@
-﻿using System;
+using Application.Features.Definition.GenericRepository;
+using Application.Features.Definition.Warehouse_Service;
+using Domain.Entity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Application.Features.Definition.GenericRepository;
-using Domain.Entity;
+using System;
 
 namespace Application.Features.Implementation.Warehouse_Service
 {
-    public class WarehouseService
+    public class WarehouseService : IWarehouseService
     {
         private readonly IGenericRepository<Warehouse> _warehouseRepo;
 

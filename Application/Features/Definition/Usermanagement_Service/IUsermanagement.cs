@@ -17,6 +17,14 @@ namespace Application.Features.Definition.Usermanagement_Service
         Task<bool> LoginAsync(string userName, string password, bool rememberMe = false, bool lockoutOnFailure = false);
         Task LogoutAsync();
         Task<ApplicationUser> FindUserByIdAsync(string userId);
+
+        /// <summary>
+        /// دریافت نام نمایشی کاربر بر اساس شناسه. اگر کاربر یافت نشود یا نامی نداشته باشد
+        /// مقدار «نامشخص» برگردانده می‌شود.
+        /// سرویس‌های رسید و حواله برای ثبت نام تأییدکننده از این متد استفاده می‌کنند.
+        /// </summary>
+        Task<string> GetUserNameByIdAsync(string userId);
+
         Task<ApplicationUser> FindUserByNameAsync(string userName);
         Task<ApplicationUser> FindUserByEmailAsync(string email);
         Task<IEnumerable<ApplicationUser>> GetAllUsersAsync();

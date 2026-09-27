@@ -1,5 +1,13 @@
+using Application.Features.Definition.Category_Service;
 using Application.Features.Definition.Context;
+using Application.Features.Definition.Customer_Service;
 using Application.Features.Definition.GenericRepository;
+using Application.Features.Definition.GoodsIssue_Service;
+using Application.Features.Definition.GoodsReceipt_Service;
+using Application.Features.Definition.Product_Service;
+using Application.Features.Definition.Supplier_Service;
+using Application.Features.Definition.Usermanagement_Service;
+using Application.Features.Definition.Warehouse_Service;
 using Application.Features.Implementation.Category_Service;
 using Application.Features.Implementation.Common;
 using Application.Features.Implementation.Customer_Service;
@@ -186,6 +194,20 @@ namespace StoreRoom
                 {
                     services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
                     services.AddScoped<IDbLock, DbLock>();
+
+                    // ثبت روی اینترفیس: لایه وب (کنترلرها) از این‌ها استفاده می‌کند
+                    // و امکان تست و mock را فراهم می‌سازد.
+                    services.AddScoped<IUserManagement, UsermanagementService>();
+                    services.AddScoped<IWarehouseService, WarehouseService>();
+                    services.AddScoped<ISupplierService, SupplierService>();
+                    services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
+                    services.AddScoped<IGoodsIssueService, GoodsIssueService>();
+                    services.AddScoped<ICustomerService, CustomerService>();
+                    services.AddScoped<IProductService, ProductService>();
+                    services.AddScoped<ICategoryService, CategoryService>();
+
+                    // ثبت روی کلاس concrete: فرم‌های WinForms فعلی هنوز نوع concrete تزریق می‌کنند.
+                    // با حذف WinForms و مهاجرت کامل به وب، این هفت خط حذف می‌شوند.
                     services.AddScoped<WarehouseService>();
                     services.AddScoped<SupplierService>();
                     services.AddScoped<GoodsReceiptService>();

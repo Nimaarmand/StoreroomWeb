@@ -1,25 +1,27 @@
 using Application.Dto;
+using Application.Features.Definition.Usermanagement_Service;
 using Application.Features.Definition.Context;
+using Application.Features.Definition.GenericRepository;
+using Application.Features.Definition.GoodsReceipt_Service;
 using Application.Features.Implementation.GenericRepository_Service;
-using Application.Features.Implementation.Usermanagement_Service;
 using Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace Application.Features.Implementation.GoodsReceipt_Service
 {
-    public class GoodsReceiptService : GenericRepository<GoodsReceipt>
+    public class GoodsReceiptService : GenericRepository<GoodsReceipt>, IGoodsReceiptService
     {
-        private readonly UsermanagementService _usermanagementService;
+        private readonly IUserManagement _usermanagementService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public GoodsReceiptService(IApplicationDbContext context,
             IDbLock dbLock,
-            UsermanagementService usermanagementService,
+            IUserManagement usermanagementService,
             UserManager<ApplicationUser> userManager
             )
             : base(context, dbLock)
@@ -250,7 +252,13 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
         }
 
         /// <summary>
-        /// تأیید رسید ورودی، افزایش موجودی محصول و موجودی کل انبار، با اعتبارسنجی ظرفیت
+        /// تأیید رسید ورودی و افزایش موجودی محصول و انبار.
+        ///
+        /// نکته مهم درباره همزمانی: موجودی با «خواندن، جمع کردن، نوشتن» به‌روزرسانی نمی‌شود.
+        /// هر سه تغییر با ExecuteUpdateAsync انجام می‌شود که به یک دستور UPDATE اتمیک
+        /// در دیتابیس تبدیل می‌شود. بنابراین اگر دو کاربر همزمان دو رسید را تأیید کنند،
+        /// هر دو افزایش دقیقاً یک بار اعمال می‌شود و هیچ تغییری گم نمی‌شود.
+        /// این تضمین بین چند سرور و بین نسخه وب و دسکتاپ هم برقرار است.
         /// </summary>
         public async Task<(bool Success, string Message)> ApproveReceiptAsync(int receiptId, string currentUserId)
         {
@@ -258,11 +266,8 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
             if (string.IsNullOrEmpty(currentUserId))
                 return (false, "کاربر جاری شناسایی نشد. لطفاً وارد شوید.");
 
-            // 2. دریافت رسید همراه با محصول و انبار
-            var receipt = await _dbSet
-                .Include(r => r.Product)
-                .Include(r => r.Warehouse)
-                .FirstOrDefaultAsync(r => r.ReceiptId == receiptId);
+            // 2. خواندن اطلاعات لازم (بدون قفل و فقط برای اعتبارسنجی اولیه)
+            var receipt = await _dbSet.FirstOrDefaultAsync(r => r.ReceiptId == receiptId);
 
             if (receipt == null)
                 return (false, "رسید یافت نشد.");
@@ -270,34 +275,66 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
             if (receipt.Status == 1)
                 return (false, "این رسید قبلاً تأیید شده است.");
 
+            if (!receipt.WarehouseId.HasValue)
+                return (false, "انبار این رسید انتخاب نشده است.");
+
             // 3. دریافت کاربر تأییدکننده
-            var user = await _userManager.FindByIdAsync(currentUserId);
+            var user = await _userManager.FindByIdAsync(currentUserId)
+                       ?? await _usermanagementService.FindUserByIdAsync(currentUserId);
+
             if (user == null)
                 return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
 
-            // 4. شروع تراکنش
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var quantity = receipt.Quantity;
+            var productId = receipt.ProductId;
+            var warehouseId = receipt.WarehouseId.Value;
+            var approverName = user.FullName ?? user.UserName ?? "نامشخص";
+
+            // در صورت خطای موقت دیتابیس، کل عملیات به‌صورت خودکار تکرار می‌شود.
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
             {
-                // افزایش موجودی محصول و انبار
-                receipt.Product.Number += (int)receipt.Quantity;
-                receipt.Warehouse.Number += (int)receipt.Quantity;
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 4. تغییر وضعیت با شرط Status = 0.
+                    // این شرط تضمین می‌کند دو کاربر همزمان فقط یکی بتواند رسید را تأیید کند.
+                    var statusRows = await _dbSet
+                        .Where(r => r.ReceiptId == receiptId && r.Status == 0)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(r => r.Status, (byte)1)
+                            .SetProperty(r => r.ApprovedByUserId, currentUserId)
+                            .SetProperty(r => r.ApprovedByFullName, approverName));
 
-                // تغییر وضعیت و ثبت اطلاعات تأییدکننده
-                receipt.Status = 1;
-                receipt.ApprovedByUserId = currentUserId;
-                receipt.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
+                    if (statusRows == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return (false, "این رسید قبلاً تأیید شده است.");
+                    }
 
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                    // 5. افزایش اتمیک موجودی محصول
+                    await _context.Set<Product>()
+                        .Where(p => p.ProductId == productId)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(p => p.Number, p => (p.Number ?? 0) + quantity));
 
-                return (true, "رسید با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                return (false, $"خطا در تأیید رسید: {ex.Message}");
-            }
+                    // 6. افزایش اتمیک موجودی انبار
+                    await _context.Set<Warehouse>()
+                        .Where(w => w.WarehouseId == warehouseId)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(w => w.Number, w => w.Number + quantity));
+
+                    await transaction.CommitAsync();
+
+                    return (true, "رسید با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return (false, $"خطا در تأیید رسید: {ex.Message}");
+                }
+            });
         }
 
         /// <summary>

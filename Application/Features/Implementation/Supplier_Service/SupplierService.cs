@@ -1,15 +1,17 @@
 using Application.Features.Definition.Context;
+using Application.Features.Definition.GenericRepository;
+using Application.Features.Definition.Supplier_Service;
 using Application.Features.Implementation.GenericRepository_Service;
 using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace Application.Features.Implementation.Supplier_Service
 {
-    public class SupplierService : GenericRepository<Supplier>
+    public class SupplierService : GenericRepository<Supplier>, ISupplierService
     {
         public SupplierService(IApplicationDbContext context, IDbLock dbLock) : base(context, dbLock)
         {

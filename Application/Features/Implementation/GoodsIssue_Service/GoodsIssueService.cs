@@ -1,20 +1,22 @@
 using Application.Dto;
+using Application.Features.Definition.Usermanagement_Service;
 using Application.Features.Definition.Context;
+using Application.Features.Definition.GenericRepository;
+using Application.Features.Definition.GoodsIssue_Service;
 using Application.Features.Implementation.GenericRepository_Service;
-using Application.Features.Implementation.Usermanagement_Service;
 using Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace Application.Features.Implementation.GoodsIssue_Service
 {
-    public class GoodsIssueService : GenericRepository<GoodsIssue>
+    public class GoodsIssueService : GenericRepository<GoodsIssue>, IGoodsIssueService
     {
-        private readonly UsermanagementService _usermanagementService;
+        private readonly IUserManagement _usermanagementService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         // ========== سازنده ==========
@@ -27,7 +29,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
         public GoodsIssueService(
             IApplicationDbContext context,
             IDbLock dbLock,
-            UsermanagementService usermanagementService,
+            IUserManagement usermanagementService,
             UserManager<ApplicationUser> userManager)
             : base(context, dbLock)
         {
@@ -208,11 +210,8 @@ namespace Application.Features.Implementation.GoodsIssue_Service
             // اجرای کل عملیات به‌صورت یک واحد قابل تکرار
             return await strategy.ExecuteAsync(async () =>
             {
-                // همه چیز داخل این بلاک اجرا می‌شود و در صورت بروز خطای موقت، دوباره اجرا می‌گردد
-                var issue = await _dbSet
-                    .Include(i => i.Product)
-                    .Include(i => i.Warehouse)
-                    .FirstOrDefaultAsync(i => i.IssueId == issueId);
+                // خواندن اطلاعات لازم (بدون قفل و فقط برای اعتبارسنجی اولیه)
+                var issue = await _dbSet.FirstOrDefaultAsync(i => i.IssueId == issueId);
 
                 if (issue == null)
                     return (false, "حواله یافت نشد.");
@@ -220,14 +219,8 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                 if (issue.Status == 1)
                     return (false, "این حواله قبلاً تأیید شده است.");
 
-                if (issue.Product == null)
-                    return (false, "کالای این حواله در دیتابیس یافت نشد.");
-
-                if (issue.Warehouse == null)
+                if (!issue.WarehouseId.HasValue)
                     return (false, "انبار این حواله انتخاب نشده است.");
-
-                if (issue.Product.Number < issue.Quantity)
-                    return (false, $"موجودی محصول '{issue.Product.Name}' کافی نیست.");
 
                 // دریافت کاربر تأییدکننده
                 var user = await _userManager.FindByIdAsync(currentUserId)
@@ -236,19 +229,56 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                 if (user == null)
                     return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
 
+                var quantity = issue.Quantity;
+                var productId = issue.ProductId;
+                var warehouseId = issue.WarehouseId.Value;
+                var approverName = user.FullName ?? user.UserName ?? "نامشخص";
+
+                var productName = await _context.Set<Product>()
+                    .Where(p => p.ProductId == productId)
+                    .Select(p => p.Name)
+                    .FirstOrDefaultAsync() ?? "نامشخص";
+
                 // شروع تراکنش درون بلاک استراتژی
                 await using var transaction = await _context.Database.BeginTransactionAsync();
 
                 try
                 {
-                    issue.Product.Number -= (int)issue.Quantity;
-                    issue.Warehouse.Number -= (int)issue.Quantity;
-                    issue.Status = 1;
-                    issue.IssueDate = DateTime.Today;
-                    issue.ApprovedByUserId = currentUserId;
-                    issue.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
+                    // 1. تغییر وضعیت با شرط Status = 0 تا دو کاربر همزمان فقط یکی موفق شود.
+                    await _dbSet
+                        .Where(i => i.IssueId == issueId && i.Status == 0)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(i => i.Status, (byte)1)
+                            .SetProperty(i => i.IssueDate, DateTime.Today)
+                            .SetProperty(i => i.ApprovedByUserId, currentUserId)
+                            .SetProperty(i => i.ApprovedByFullName, approverName));
 
-                    await _context.SaveChangesAsync();
+                    // 2. کسر اتمیک موجودی محصول، فقط در صورتی که موجودی کافی باشد.
+                    // شرط داخل UPDATE دیتابیس، موجودی را در همان لحظه بررسی می‌کند؛
+                    // بنابراین دو حواله همزمان هرگز موجودی را منفی نمی‌کنند.
+                    var productRows = await _context.Set<Product>()
+                        .Where(p => p.ProductId == productId && (p.Number ?? 0) >= quantity)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(p => p.Number, p => (p.Number ?? 0) - quantity));
+
+                    if (productRows == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return (false, $"موجودی محصول '{productName}' کافی نیست.");
+                    }
+
+                    // 3. کسر اتمیک موجودی انبار
+                    var warehouseRows = await _context.Set<Warehouse>()
+                        .Where(w => w.WarehouseId == warehouseId && w.Number >= quantity)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(w => w.Number, w => w.Number - quantity));
+
+                    if (warehouseRows == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return (false, "موجودی انبار برای این حواله کافی نیست.");
+                    }
+
                     await transaction.CommitAsync();
 
                     return (true, "حواله با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
