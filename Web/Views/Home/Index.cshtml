@@ -1,0 +1,119 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "داشبورد";
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="fs-4 fw-bold num">@PersianDate.Digits(Model.ProductCount.ToString())</div>
+                <div class="small opacity-75">تعداد کالاها</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="fs-4 fw-bold num">@PersianDate.Digits(Model.TotalStock.ToString())</div>
+                <div class="small opacity-75">موجودی کل</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card bg-info text-dark h-100">
+            <div class="card-body">
+                <div class="fs-4 fw-bold num">@PersianDate.Digits(Model.WarehouseCount.ToString())</div>
+                <div class="small opacity-75">تعداد انبارها</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body">
+                <div class="fs-4 fw-bold num">@PersianDate.Digits(Model.LowStockProducts.Count.ToString())</div>
+                <div class="small opacity-75">کالاهای رو به اتمام</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-exclamation-triangle text-warning"></i>
+                کالاهای زیر حداقل موجودی
+            </div>
+            <div class="card-body p-0">
+                @if (Model.LowStockProducts.Count == 0)
+                {
+                    <div class="text-center text-secondary py-4">
+                        همه کالاها موجودی کافی دارند.
+                    </div>
+                }
+                else
+                {
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>کالا</th>
+                                <th class="text-center">موجودی</th>
+                                <th class="text-center">حداقل</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.LowStockProducts)
+                            {
+                                <tr>
+                                    <td>@row.Name</td>
+                                    <td class="text-center">
+                                        <span class="num text-danger fw-semibold">@PersianDate.Digits(row.Stock.ToString())</span>
+                                        <span class="text-secondary small">@row.Unit</span>
+                                    </td>
+                                    <td class="text-center num text-secondary">@PersianDate.Digits(row.MinStockLevel?.ToString() ?? "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-building text-primary"></i>
+                وضعیت انبارها
+            </div>
+            <div class="card-body">
+                @if (Model.WarehouseStocks.Count == 0)
+                {
+                    <div class="text-center text-secondary py-4">هنوز انباری ثبت نشده است.</div>
+                }
+                else
+                {
+                    foreach (var w in Model.WarehouseStocks)
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>@w.Name</span>
+                                <span class="num text-secondary">
+                                    @PersianDate.Digits(w.Number.ToString()) / @PersianDate.Digits(w.Max.ToString())
+                                </span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                @{
+                                    var pct = w.FillPercent;
+                                    var barClass = pct >= 90 ? "bg-danger" : pct >= 70 ? "bg-warning" : "bg-success";
+                                }
+                                <div class="progress-bar @barClass" style="width:@pct%"></div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

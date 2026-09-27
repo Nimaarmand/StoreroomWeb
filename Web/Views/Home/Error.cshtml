@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "خطا";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-5 text-center">
+        <div class="fs-1 mb-3">⚠️</div>
+        <h5 class="text-danger">خطایی رخ داد</h5>
+        <p class="text-secondary">
+            @(ViewData["Message"] as string ?? "در پردازش درخواست خطایی پیش آمد. لطفاً دوباره تلاش کنید.")
+        </p>
+        <a class="btn btn-outline-secondary btn-sm" asp-controller="Home" asp-action="Index">بازگشت به داشبورد</a>
+    </div>
+</div>

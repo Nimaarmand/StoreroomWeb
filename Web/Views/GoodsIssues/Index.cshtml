@@ -1,0 +1,95 @@
+@model List<GoodsIssueDto>
+@{
+    ViewData["Title"] = "حواله‌ها";
+    var keyword = ViewData["Keyword"] as string;
+    var canApprove = User.IsInRole("Admin") || User.IsInRole("Manager");
+}
+
+@if (TempData["Message"] is string msg)
+{
+    <div class="alert alert-info py-2">@msg</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-12 col-md-4">
+        <input type="text" name="keyword" value="@keyword" class="form-control"
+               placeholder="جستجو در شماره، کالا، مشتری..." />
+    </div>
+    <div class="col-12 col-md-auto">
+        <button class="btn btn-primary" type="submit">جستجو</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">همه</a>
+    </div>
+</form>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-box-arrow-up-left"></i> فهرست حواله‌ها</span>
+        <span class="badge text-bg-secondary num">@PersianDate.Digits(Model.Count.ToString())</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>شماره</th>
+                    <th>کالا</th>
+                    <th>مشتری</th>
+                    <th>انبار</th>
+                    <th class="text-center">تعداد</th>
+                    <th>نوع</th>
+                    <th>تاریخ</th>
+                    <th class="text-center">وضعیت</th>
+                    <th class="text-center">عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="text-center text-secondary py-4">حواله‌ای یافت نشد.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var i in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">
+                                @(string.IsNullOrWhiteSpace(i.InvoiceNumber) ? "—" : i.InvoiceNumber)
+                            </td>
+                            <td>@i.ProductName</td>
+                            <td class="text-secondary">
+                                @(string.IsNullOrWhiteSpace(i.CustomerName) ? "—" : i.CustomerName)
+                            </td>
+                            <td class="text-secondary">
+                                @(string.IsNullOrWhiteSpace(i.WarehouseName) ? "—" : i.WarehouseName)
+                            </td>
+                            <td class="text-center">
+                                <span class="num">@PersianDate.Digits(i.Quantity.ToString())</span>
+                                <span class="small text-secondary">@i.Unit</span>
+                            </td>
+                            <td>@i.TypeText</td>
+                            <td class="num">
+                                @(i.CreatedAt.HasValue ? PersianDate.ToPersianDate(i.CreatedAt.Value) : "—")
+                            </td>
+                            <td class="text-center">
+                                <span class="badge @(string.IsNullOrWhiteSpace(i.StatusText) ? "bg-secondary" : "")">
+                                    @(string.IsNullOrWhiteSpace(i.StatusText) ? "—" : i.StatusText)
+                                </span>
+                            </td>
+                            <td class="text-center text-nowrap">
+                                <a class="btn btn-sm btn-outline-primary"
+                                   asp-action="Details" asp-route-id="@i.IssueId">جزئیات</a>
+                                @if (canApprove)
+                                {
+                                    <form asp-action="Approve" asp-route-id="@i.IssueId" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-success" type="submit">تأیید</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

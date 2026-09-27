@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - مدیریت انبار</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-body-secondary">
+    <div class="container" style="max-width: 420px;">
+        <div class="text-center my-5">
+            <div class="fs-1">📦</div>
+            <div class="fs-5 fw-bold text-primary">مدیریت انبار</div>
+        </div>
+        @RenderBody()
+    </div>
+    <script src="~/lib/bootstrap/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

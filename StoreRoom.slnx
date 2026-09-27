@@ -10,4 +10,5 @@
   <Folder Name="/User interface/">
     <Project Path="StoreRoom/StoreRoom.csproj" />
   </Folder>
+  <Project Path="Web/Web.csproj" />
 </Solution>

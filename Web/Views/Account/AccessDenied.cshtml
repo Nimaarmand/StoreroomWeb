@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "دسترسی مجاز نیست";
+    Layout = "_AuthLayout";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4 text-center">
+        <div class="fs-1 mb-2">🚫</div>
+        <h5 class="text-danger">دسترسی لازم را ندارید</h5>
+        <p class="text-secondary small">
+            نقش کاربری شما اجازه انجام این عملیات را نمی‌دهد.
+            اگر فکر می‌کنید این محدودیت اشتباه است، با مدیر سیستم تماس بگیرید.
+        </p>
+        <a class="btn btn-outline-secondary btn-sm" asp-controller="Home" asp-action="Index">بازگشت به داشبورد</a>
+    </div>
+</div>

@@ -1,0 +1,114 @@
+@model GoodsReceipt
+@{
+    ViewData["Title"] = "جزئیات رسید";
+    var canApprove = User.IsInRole("Admin") || User.IsInRole("Manager");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">جزئیات رسید شماره @Model.InvoiceNumber</h5>
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">بازگشت به فهرست</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">اطلاعات کالا</div>
+            <div class="card-body">
+                <dl class="row mb-0 small">
+                    <dt class="col-5 text-secondary">کالا</dt>
+                    <dd class="col-7">@(Model.Product?.Name ?? "—")</dd>
+
+                    <dt class="col-5 text-secondary">بارکد اسکن‌شده</dt>
+                    <dd class="col-7 num">@(string.IsNullOrWhiteSpace(Model.ScannedBarcode) ? "—" : Model.ScannedBarcode)</dd>
+
+                    <dt class="col-5 text-secondary">شماره بچ</dt>
+                    <dd class="col-7 num">@(string.IsNullOrWhiteSpace(Model.BatchNumber) ? "—" : Model.BatchNumber)</dd>
+
+                    <dt class="col-5 text-secondary">تعداد</dt>
+                    <dd class="col-7">
+                        <span class="num">@PersianDate.Digits(Model.Quantity.ToString())</span>
+                        <span class="text-secondary">@Model.Unit</span>
+                    </dd>
+
+                    <dt class="col-5 text-secondary">موضع قفسه</dt>
+                    <dd class="col-7">@(string.IsNullOrWhiteSpace(Model.ShelfLocation) ? "—" : Model.ShelfLocation)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">اطلاعات فاکتور</div>
+            <div class="card-body">
+                <dl class="row mb-0 small">
+                    <dt class="col-5 text-secondary">تامین‌کننده</dt>
+                    <dd class="col-7">@(Model.Supplier?.Name ?? "—")</dd>
+
+                    <dt class="col-5 text-secondary">انبار</dt>
+                    <dd class="col-7">@(Model.Warehouse?.Name ?? "ثبت نشده")</dd>
+
+                    <dt class="col-5 text-secondary">تاریخ فاکتور</dt>
+                    <dd class="col-7">@PersianDate.ToPersianDate(Model.InvoiceDate)</dd>
+
+                    <dt class="col-5 text-secondary">تاریخ رسید</dt>
+                    <dd class="col-7">@PersianDate.ToPersianDate(Model.ReceiptDate)</dd>
+
+                    <dt class="col-5 text-secondary">قیمت واحد</dt>
+                    <dd class="col-7 num">@PersianDate.Digits(Model.UnitPrice.ToString("N0"))</dd>
+
+                    <dt class="col-5 text-secondary">مالیات</dt>
+                    <dd class="col-7 num">@PersianDate.Digits(Model.TaxRate.ToString("N0"))٪</dd>
+
+                    <dt class="col-5 text-secondary fw-bold">مبلغ نهایی</dt>
+                    <dd class="col-7 num fw-bold">@PersianDate.Digits(Model.NetPrice.ToString("N0"))</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white fw-semibold">وضعیت و سوابق</div>
+            <div class="card-body">
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-3 text-secondary">وضعیت</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge @Web.Models.StatusBadge.Css(Model.Status)">
+                            @Web.Models.StatusBadge.Text(Model.Status)
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3 text-secondary">ثبت‌کننده</dt>
+                    <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.UserFullName) ? "—" : Model.UserFullName)</dd>
+
+                    <dt class="col-sm-3 text-secondary">تاریخ ثبت</dt>
+                    <dd class="col-sm-9">@PersianDate.ToPersian(Model.CreatedAt)</dd>
+
+                    <dt class="col-sm-3 text-secondary">تأییدکننده</dt>
+                    <dd class="col-sm-9">
+                        @(string.IsNullOrWhiteSpace(Model.ApprovedByFullName) ? "تأیید نشده" : Model.ApprovedByFullName)
+                    </dd>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <dt class="col-sm-3 text-secondary">توضیحات</dt>
+                        <dd class="col-sm-9">@Model.Description</dd>
+                    }
+                </dl>
+
+                @if (canApprove && Model.Status == 0)
+                {
+                    <div class="d-flex gap-2 mt-3 pt-3 border-top">
+                        <form asp-action="Approve" asp-route-id="@Model.ReceiptId" method="post" class="d-inline">
+                            <button class="btn btn-success" type="submit">تأیید و به‌روزرسانی موجودی</button>
+                        </form>
+                        <form asp-action="Cancel" asp-route-id="@Model.ReceiptId" method="post" class="d-inline">
+                            <button class="btn btn-outline-danger" type="submit">لغو رسید</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

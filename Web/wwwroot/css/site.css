@@ -1,0 +1,32 @@
+body {
+    font-family: "Vazirmatn", "IRANSans", "Segoe UI", Tahoma, sans-serif;
+    font-size: 14px;
+}
+
+/* اعداد در جدول‌های مالی باید لاتین و هم‌عرض باشند تا ستون‌ها تراز بمانند */
+.num {
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+    display: inline-block;
+    text-align: start;
+    unicode-bidi: embed;
+}
+
+.card {
+    border: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+}
+
+.table > :not(caption) > * > * {
+    padding: .6rem .75rem;
+}
+
+.sticky-actions {
+    position: sticky;
+    bottom: 0;
+}
+
+/* نشانگر وضعیت */
+.badge-status-0 { background-color: #ffc107; color: #000; }
+.badge-status-1 { background-color: #198754; }
+.badge-status-2 { background-color: #dc3545; }
