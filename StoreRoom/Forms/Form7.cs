@@ -18,7 +18,7 @@ namespace StoreRoom.Forms
     public partial class Form7 : MaterialForm
     {
         private readonly ProductService _productService;
-        private Guid _productId;  // ✅ تغییر از int به Guid
+        private Guid _productId;
 
         public Form7(ProductService productService)
         {
@@ -29,6 +29,7 @@ namespace StoreRoom.Forms
         private void Form7_Load(object sender, EventArgs e)
         {
             textBoxEdit1.Text = "جستجو ...";
+            poisonDataGridView1.CellFormatting += poisonDataGridView1_CellFormatting;
         }
 
         private void textBoxEdit1_Enter(object sender, EventArgs e)
@@ -90,7 +91,7 @@ namespace StoreRoom.Forms
             int count = (int)dungeonNumeric1.Value;
             if (count <= 0) count = 20;
 
-            var products = await _productService.GetTopProductsAsync(count); // ✅ استفاده از متد موجود
+            var products = await _productService.GetTopProductsAsync(count);
             poisonDataGridView1.DataSource = products.ToList();
 
             DgvPersian();
@@ -125,7 +126,6 @@ namespace StoreRoom.Forms
         {
             if (e.RowIndex >= 0 && poisonDataGridView1.Rows[e.RowIndex].Cells["ProductId"].Value != null)
             {
-                // ✅ تبدیل صحیح از object به Guid
                 _productId = (Guid)poisonDataGridView1.Rows[e.RowIndex].Cells["ProductId"].Value;
             }
         }
@@ -139,7 +139,6 @@ namespace StoreRoom.Forms
                 return;
             }
 
-            // ✅ ترتیب صحیح پارامترها: اول سرویس، سپس شناسه
             var editForm = new Form5(_productService, _productId);
             if (editForm.ShowDialog() == DialogResult.OK)
             {
@@ -147,36 +146,59 @@ namespace StoreRoom.Forms
             }
         }
 
-        // ========== جستجوی زنده ==========
-        private async void textBoxEdit1_TextChanged(object sender, EventArgs e)
-        {
-            string name = textBoxEdit1.Text.Trim();
-
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                await LoadProductsAsync(showEmptyMessage: false);
-                return;
-            }
-
-            var searchResults = await _productService.SearchByNameAsync(name);
-            poisonDataGridView1.DataSource = searchResults.ToList();
-            DgvPersian();
-            CustomizeDataGridView();
-
-            if (!searchResults.Any())
-                MessageBox.Show("هیچ محصولی با این نام یافت نشد.", "نتیجه جستجو", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+        // ========== جستجوی زنده) ==========
 
         private async void textBoxEdit1_TextChanged_1(object sender, EventArgs e)
         {
-            string name = textBoxEdit1.Text.Trim();
+            string keyword = textBoxEdit1.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(name))
+            // اگر متن placeholder است، هیچ کاری نکن
+            if (keyword == "جستجو ...")
+                return;
+
+            // اگر جستجو خالی شد، لیست کامل را نمایش بده
+            if (string.IsNullOrWhiteSpace(keyword))
             {
                 await LoadProductsAsync(showEmptyMessage: false);
                 return;
             }
+
+            try
+            {
+                var searchResults = await _productService.SearchByNameAsync(keyword);
+                poisonDataGridView1.DataSource = searchResults.ToList();
+                DgvPersian();
+                CustomizeDataGridView();
+
+                if (!searchResults.Any())
+                    MessageBox.Show("هیچ محصولی با این نام یافت نشد.", "نتیجه جستجو",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطا در جستجو: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+        // ========== رویداد CellFormatting برای نمایش نام دسته‌بندی ==========
+        private void poisonDataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.Value == null || e.Value == DBNull.Value)
+            {
+                if (poisonDataGridView1.Columns[e.ColumnIndex].Name == "Category")
+                {
+                    e.Value = "بدون دسته‌بندی";
+                    e.FormattingApplied = true;
+                }
+                return;
+            }
+
+            if (poisonDataGridView1.Columns[e.ColumnIndex].Name == "Category" && e.Value is Category category)
+            {
+                e.Value = category.Name;
+                e.FormattingApplied = true;
+            }
+        }
+
         // ==========  ثبت ورود کالا ==========
         private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
@@ -186,16 +208,16 @@ namespace StoreRoom.Forms
                 return;
             }
 
-            // دریافت سرویس‌های مورد نیاز از DI
             var goodsReceiptService = Program.ServiceProvider.GetRequiredService<GoodsReceiptService>();
             var warehouseService = Program.ServiceProvider.GetRequiredService<WarehouseService>();
             var supplierService = Program.ServiceProvider.GetRequiredService<SupplierService>();
+            var userManager = Program.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-            // ارسال تمام وابستگی‌ها به سازنده
-            var createform = new Form12(goodsReceiptService, warehouseService, supplierService, _productId);
+            var createform = new Form12(goodsReceiptService, warehouseService, supplierService, userManager, _productId);
             createform.ShowDialog();
         }
 
+        // ==========  ثبت خروج کالا ==========
         private void toolStripMenuItem4_Click(object sender, EventArgs e)
         {
             if (_productId == Guid.Empty)
@@ -208,8 +230,36 @@ namespace StoreRoom.Forms
             var warehouseService = Program.ServiceProvider.GetRequiredService<WarehouseService>();
             var customerService = Program.ServiceProvider.GetRequiredService<CustomerService>();
             var userManager = Program.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
             var createform = new Form15(goodsIssueService, warehouseService, customerService, userManager, _productId);
             createform.ShowDialog();
         }
+
+        // ========== حذف محصول ==========
+        private async void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            if (_productId == Guid.Empty)
+            {
+                MessageBox.Show("لطفاً ابتدا یک سطر را انتخاب کنید.", "اخطار", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("آیا از حذف این محصول اطمینان دارید؟", "تأیید حذف",
+                                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    await _productService.DeleteProductAsync(_productId);
+                    MessageBox.Show("محصول با موفقیت حذف شد.", "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await LoadProductsAsync(showEmptyMessage: false);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"خطا در حذف محصول: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+     
     }
 }

@@ -181,7 +181,7 @@ namespace StoreRoom.Forms
 
             try
             {
-                var results = await _goodsIssueService.SearchIssuesAsync(keyword, (int)dungeonNumeric1.Value);
+                var results = await _goodsIssueService.SearchIssues(keyword, (int)dungeonNumeric1.Value);
                 var approvedResults = results?
                     .Where(r => r != null && r.StatusText == "تأیید شده")
                     .ToList() ?? new List<GoodsIssueDto>();
@@ -216,6 +216,18 @@ namespace StoreRoom.Forms
             {
                 MessageBox.Show($"خطا در بارگذاری: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void textBoxEdit1_Enter(object sender, EventArgs e)
+        {
+            if (textBoxEdit1.Text == "جستجو ...")
+                textBoxEdit1.Text = "";
+        }
+
+        private void textBoxEdit1_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(textBoxEdit1.Text))
+                textBoxEdit1.Text = "جستجو ...";
         }
     }
 }

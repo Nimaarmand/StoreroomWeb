@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Compile Update="Forms\ContactUs.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -49,7 +52,16 @@
     <Compile Update="Forms\Form24.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="Forms\Form25.cs">
+    <Compile Update="Forms\Form26.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Form27.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FormMachineCode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\Settings.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Forms\Form3.cs">

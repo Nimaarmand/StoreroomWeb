@@ -1,5 +1,9 @@
-﻿using Application.Features.Implementation.Product_Service;
+﻿using Application.Features.Implementation.Category_Service;
+using Application.Features.Implementation.Customer_Service;
+using Application.Features.Implementation.Product_Service;
 using Domain.Entity;
+using Microsoft.Extensions.DependencyInjection;
+using ReaLTaiizor.Controls;
 using ReaLTaiizor.Forms;
 using System;
 using System.Windows.Forms;
@@ -9,18 +13,37 @@ namespace StoreRoom.Forms
     public partial class Form5 : MaterialForm
     {
         private readonly ProductService _productService;
+        private readonly CategoryService _categoryService;
         private Guid _productId;
 
         // سازنده اصلی (برای ویرایش با شناسه)
-        public Form5(ProductService productService, Guid productId)
+        public Form5(ProductService productService, CategoryService categoryService, Guid productId)
         {
             InitializeComponent();
             _productService = productService;
+            _categoryService = categoryService;
             _productId = productId;
         }
 
-        // سازنده اضافی برای درج جدید (بدون نیاز به ارسال شناسه)
-        public Form5(ProductService productService) : this(productService, Guid.Empty)
+        // سازنده برای درج جدید (بدون شناسه) - با دریافت CategoryService از DI
+        public Form5(ProductService productService, CategoryService categoryService)
+            : this(productService, categoryService, Guid.Empty)
+        {
+        }
+
+        // سازنده برای درج جدید (بدون نیاز به ارسال CategoryService) - از ServiceProvider دریافت می‌کند
+        public Form5(ProductService productService)
+            : this(productService,
+                   Program.ServiceProvider.GetRequiredService<CategoryService>(),
+                   Guid.Empty)
+        {
+        }
+
+        // سازنده برای ویرایش با productId (بدون نیاز به CategoryService جداگانه)
+        public Form5(ProductService productService, Guid productId)
+            : this(productService,
+                   Program.ServiceProvider.GetRequiredService<CategoryService>(),
+                   productId)
         {
         }
 
@@ -36,7 +59,6 @@ namespace StoreRoom.Forms
             comboBoxEdit1.Text = "";
             dateTimePicker1.Value = DateTime.Now;
             dateTimePicker2.Value = DateTime.Now;
-            // اگر از CheckBox برای فعال/غیرفعال کردن تاریخ استفاده می‌کنید، آن را هم ریست کنید
             dateTimePicker1.Checked = true;
             dateTimePicker2.Checked = true;
         }
@@ -63,12 +85,12 @@ namespace StoreRoom.Forms
                 if (!string.IsNullOrWhiteSpace(textBoxEdit6.Text) && int.TryParse(textBoxEdit6.Text, out int num))
                     number = num;
 
-                decimal? minStock = null;
-                if (!string.IsNullOrWhiteSpace(textBoxEdit4.Text) && decimal.TryParse(textBoxEdit4.Text, out decimal min))
+                int? minStock = null;
+                if (!string.IsNullOrWhiteSpace(textBoxEdit4.Text) && int.TryParse(textBoxEdit4.Text, out int min))
                     minStock = min;
 
-                decimal? maxStock = null;
-                if (!string.IsNullOrWhiteSpace(textBoxEdit3.Text) && decimal.TryParse(textBoxEdit3.Text, out decimal max))
+                int? maxStock = null;
+                if (!string.IsNullOrWhiteSpace(textBoxEdit3.Text) && int.TryParse(textBoxEdit3.Text, out int max))
                     maxStock = max;
 
                 decimal? weight = null;
@@ -95,7 +117,9 @@ namespace StoreRoom.Forms
                     MessageBox.Show("تعداد موجودی نمی‌تواند منفی باشد.", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
+                int? categoryId = null;
+                if (comboBoxEdit5.SelectedValue != null && int.TryParse(comboBoxEdit5.SelectedValue.ToString(), out int catId))
+                    categoryId = catId;
                 if (_productId == Guid.Empty) // درج جدید
                 {
                     var newProduct = new Product
@@ -107,6 +131,7 @@ namespace StoreRoom.Forms
                         ProductionDate = productionDate,
                         ExpirationDate = expirationDate,
                         Number = number,
+                        CategoryId = categoryId,
                         MinStockLevel = minStock,
                         MaxStockLevel = maxStock,
                         Weight = weight,
@@ -117,7 +142,7 @@ namespace StoreRoom.Forms
                     if (result.Success)
                     {
                         MessageBox.Show(result.Message, "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        ResetToAddMode(); // بازنشانی به حالت درج جدید
+                        ResetToAddMode();
                     }
                     else
                         MessageBox.Show(result.Message, "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -140,18 +165,16 @@ namespace StoreRoom.Forms
                     existing.MinStockLevel = minStock;
                     existing.MaxStockLevel = maxStock;
                     existing.Weight = weight;
-                    // IsActive و CreatedAt تغییر نمی‌کنند
+
                     var result = await _productService.UpdateProductAsync(existing);
                     if (result.Success)
                     {
                         MessageBox.Show(result.Message, "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        ResetToAddMode(); // پس از بروزرسانی، فرم به حالت درج جدید می‌رود
+                        ResetToAddMode();
                     }
                     else
                         MessageBox.Show(result.Message, "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-
-                // حذف شد: this.DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {
@@ -166,6 +189,18 @@ namespace StoreRoom.Forms
 
         private async void Form5_Load(object sender, EventArgs e)
         {
+            // بارگذاری دسته‌بندی‌ها در کامبوباکس
+            var categories = await _categoryService.GetAllAsync();
+            comboBoxEdit5.DataSource = categories.ToList();
+            comboBoxEdit5.DisplayMember = "Name";
+            comboBoxEdit5.ValueMember = "CategoryId";
+            comboBoxEdit5.SelectedIndex = -1;
+
+            var screen = Screen.FromControl(this);
+            this.StartPosition = FormStartPosition.Manual;
+            this.Left = screen.WorkingArea.Left + (screen.WorkingArea.Width - this.Width) / 2;
+            this.Top = screen.WorkingArea.Top + (screen.WorkingArea.Height - this.Height) / 2;
+
             if (_productId != Guid.Empty)
             {
                 var product = await _productService.GetByIdAsync(_productId);
@@ -180,13 +215,22 @@ namespace StoreRoom.Forms
                     textBoxEdit7.Text = product.Weight?.ToString();
                     comboBoxEdit1.Text = product.BaseUnit;
 
+                    if (product.CategoryId.HasValue)
+                        comboBoxEdit5.SelectedValue = product.CategoryId.Value;
+
                     if (product.ProductionDate.HasValue)
+                    {
                         dateTimePicker1.Value = product.ProductionDate.Value;
+                        dateTimePicker1.Checked = true;
+                    }
                     else
                         dateTimePicker1.Checked = false;
 
                     if (product.ExpirationDate.HasValue)
+                    {
                         dateTimePicker2.Value = product.ExpirationDate.Value;
+                        dateTimePicker2.Checked = true;
+                    }
                     else
                         dateTimePicker2.Checked = false;
 

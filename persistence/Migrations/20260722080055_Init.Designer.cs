@@ -12,7 +12,7 @@ using Persistans.Context;
 namespace persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260621080054_Init")]
+    [Migration("20260722080055_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -188,6 +188,13 @@ namespace persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReceiptId"));
 
+                    b.Property<string>("ApprovedByFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ApprovedByUserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("BatchNumber")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -215,8 +222,8 @@ namespace persistence.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ReceiptDate")
                         .HasColumnType("datetime2");
@@ -247,6 +254,10 @@ namespace persistence.Migrations
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserFullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");

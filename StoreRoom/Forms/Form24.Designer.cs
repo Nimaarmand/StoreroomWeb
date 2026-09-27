@@ -114,6 +114,8 @@
             textBoxEdit1.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit1.UseSystemPasswordChar = false;
             textBoxEdit1.TextChanged += textBoxEdit1_TextChanged;
+            textBoxEdit1.Enter += textBoxEdit1_Enter;
+            textBoxEdit1.Leave += textBoxEdit1_Leave;
             // 
             // panel1
             // 

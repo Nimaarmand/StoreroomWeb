@@ -13,39 +13,39 @@ namespace StoreRoom.Forms
     public partial class Form23 : MaterialForm
     {
         private readonly GoodsReceiptService _goodsReceiptService;
+
         public Form23(GoodsReceiptService goodsReceiptService)
         {
             InitializeComponent();
             _goodsReceiptService = goodsReceiptService;
+            // اتصال رویداد CellFormatting برای فرمت قیمت‌ها
+            poisonDataGridView1.CellFormatting += PoisonDataGridView1_CellFormatting;
         }
+
         // ========== بارگذاری داده‌ها ==========
         private async Task LoadReceiptsAsync(bool showEmptyMessage = false)
         {
-            // دریافت تعداد از NumericUpDown (نام کنترل را متناسب با پروژه خود تنظیم کنید)
-            int count = (int)dungeonNumeric1.Value;  // فرض می‌کنیم NumericUpDown با همین نام وجود دارد
+            int count = (int)dungeonNumeric1.Value;
             if (count <= 0) count = 20;
 
-            // فراخوانی سرویس برای دریافت DTOها
-            var receipts = await _goodsReceiptService.GetTopReceiptsWithDetailsAsync(count);
+            var receipts = await _goodsReceiptService.GetTopApprovedReceiptsAsync(count);
             poisonDataGridView1.DataSource = receipts.ToList();
 
-            // اعمال تنظیمات فارسی و ظاهری
-            DgvPersian();          // این متد باید بر اساس خواص DTO تنظیم شود
+            DgvPersian();
             CustomizeDataGridView();
 
             if (showEmptyMessage && !receipts.Any())
                 MessageBox.Show("هیچ رسیدی یافت نشد.", "اطلاع", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // ========== تنظیمات دیتاگرید (فارسی‌سازی بر اساس GoodsReceiptDto) ==========
+        // ========== تنظیمات دیتاگرید ==========
         private void DgvPersian()
         {
-            // 1. مخفی کردن تمام ستون‌ها
             foreach (DataGridViewColumn col in poisonDataGridView1.Columns)
             {
                 col.Visible = false;
             }
-            // ستون نام محصول
+
             if (poisonDataGridView1.Columns.Contains("ProductName"))
             {
                 poisonDataGridView1.Columns["ProductName"].Visible = true;
@@ -60,7 +60,6 @@ namespace StoreRoom.Forms
                 poisonDataGridView1.Columns["Description"].DisplayIndex = 1;
             }
 
-            // ستون تعداد
             if (poisonDataGridView1.Columns.Contains("Quantity"))
             {
                 poisonDataGridView1.Columns["Quantity"].Visible = true;
@@ -68,14 +67,13 @@ namespace StoreRoom.Forms
                 poisonDataGridView1.Columns["Quantity"].DisplayIndex = 2;
             }
 
-            // ستون واحد
             if (poisonDataGridView1.Columns.Contains("Unit"))
             {
                 poisonDataGridView1.Columns["Unit"].Visible = true;
                 poisonDataGridView1.Columns["Unit"].HeaderText = "واحد";
                 poisonDataGridView1.Columns["Unit"].DisplayIndex = 3;
             }
-            //قیمت
+
             if (poisonDataGridView1.Columns.Contains("UnitPrice"))
             {
                 poisonDataGridView1.Columns["UnitPrice"].Visible = true;
@@ -83,36 +81,35 @@ namespace StoreRoom.Forms
                 poisonDataGridView1.Columns["UnitPrice"].DisplayIndex = 4;
             }
 
-            //قیمت کل 
             if (poisonDataGridView1.Columns.Contains("TotalPrice"))
             {
                 poisonDataGridView1.Columns["TotalPrice"].Visible = true;
                 poisonDataGridView1.Columns["TotalPrice"].HeaderText = "قیمت کل";
                 poisonDataGridView1.Columns["TotalPrice"].DisplayIndex = 5;
             }
-            // ستون تاریخ ورود
+
             if (poisonDataGridView1.Columns.Contains("ReceiptDate"))
             {
                 poisonDataGridView1.Columns["ReceiptDate"].Visible = true;
                 poisonDataGridView1.Columns["ReceiptDate"].HeaderText = "تاریخ ورود";
+                poisonDataGridView1.Columns["ReceiptDate"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
                 poisonDataGridView1.Columns["ReceiptDate"].DisplayIndex = 6;
             }
 
-            //انبار 
             if (poisonDataGridView1.Columns.Contains("WarehouseName"))
             {
                 poisonDataGridView1.Columns["WarehouseName"].Visible = true;
                 poisonDataGridView1.Columns["WarehouseName"].HeaderText = "انبار";
                 poisonDataGridView1.Columns["WarehouseName"].DisplayIndex = 7;
             }
-            //تامین کننده 
+
             if (poisonDataGridView1.Columns.Contains("SupplierName"))
             {
                 poisonDataGridView1.Columns["SupplierName"].Visible = true;
-                poisonDataGridView1.Columns["SupplierName"].HeaderText = " تأمین‌کننده";
+                poisonDataGridView1.Columns["SupplierName"].HeaderText = "تأمین‌کننده";
                 poisonDataGridView1.Columns["SupplierName"].DisplayIndex = 8;
             }
-            // ستون شماره فاکتور
+
             if (poisonDataGridView1.Columns.Contains("InvoiceNumber"))
             {
                 poisonDataGridView1.Columns["InvoiceNumber"].Visible = true;
@@ -120,7 +117,6 @@ namespace StoreRoom.Forms
                 poisonDataGridView1.Columns["InvoiceNumber"].DisplayIndex = 9;
             }
 
-            // ستون وضعیت (تأیید شده، در انتظار، لغو شده)
             if (poisonDataGridView1.Columns.Contains("StatusText"))
             {
                 poisonDataGridView1.Columns["StatusText"].Visible = true;
@@ -128,17 +124,13 @@ namespace StoreRoom.Forms
                 poisonDataGridView1.Columns["StatusText"].DisplayIndex = 10;
             }
 
-
-
-            if (poisonDataGridView1.Columns.Contains("FullName"))
+            if (poisonDataGridView1.Columns.Contains("ApprovedByFullName"))
             {
-                poisonDataGridView1.Columns["FullName"].Visible = true;
-                poisonDataGridView1.Columns["FullName"].HeaderText = "‌تحویل گیرنده";
-                poisonDataGridView1.Columns["FullName"].DisplayIndex = 11;
+                poisonDataGridView1.Columns["ApprovedByFullName"].Visible = true;
+                poisonDataGridView1.Columns["ApprovedByFullName"].HeaderText = "تحویل به مشتری";
+                poisonDataGridView1.Columns["ApprovedByFullName"].DisplayIndex = 11;
             }
-
         }
-
 
         // ========== تنظیمات ظاهری دیتاگرید ==========
         private void CustomizeDataGridView()
@@ -151,13 +143,27 @@ namespace StoreRoom.Forms
             poisonDataGridView1.ReadOnly = true;
         }
 
+        // ========== فرمت قیمت‌ها (سه‌رقم سه‌رقم) ==========
+        private void PoisonDataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.Value == null || e.Value == DBNull.Value) return;
+
+            if (poisonDataGridView1.Columns[e.ColumnIndex].Name == "UnitPrice" ||
+                poisonDataGridView1.Columns[e.ColumnIndex].Name == "TotalPrice")
+            {
+                if (decimal.TryParse(e.Value.ToString(), out decimal price))
+                {
+                    e.Value = price.ToString("#,0");
+                    e.FormattingApplied = true;
+                }
+            }
+        }
+
+        // ========== رویدادها ==========
         private async void Form23_Load(object sender, EventArgs e)
         {
-            // تنظیم placeholder برای تکست باکس جستجو (در صورت وجود)
             textBoxEdit1.Text = "جستجو ...";
-            // تنظیمات اولیه دیتاگرید
             CustomizeDataGridView();
-            // بارگذاری داده‌ها با مقدار پیش‌فرض NumericUpDown (مثلاً 20)
             await LoadReceiptsAsync(showEmptyMessage: false);
         }
 
@@ -178,14 +184,9 @@ namespace StoreRoom.Forms
 
             try
             {
-                // فراخوانی متد جدید برای رسیدهای تأیید شده
                 var receipts = await _goodsReceiptService.GetTopApprovedReceiptsAsync(count);
-
-                // دیباگ (اختیاری)
-                MessageBox.Show($"تعداد رکورد دریافتی: {receipts?.Count() ?? 0}");
-
                 poisonDataGridView1.DataSource = receipts?.ToList();
-                DgvPersian();         
+                DgvPersian();
                 CustomizeDataGridView();
 
                 if (receipts == null || !receipts.Any())
@@ -194,6 +195,39 @@ namespace StoreRoom.Forms
             catch (Exception ex)
             {
                 MessageBox.Show($"خطا: {ex.Message}");
+            }
+        }
+
+        private async void textBoxEdit1_TextChanged(object sender, EventArgs e)
+        {
+            string keyword = textBoxEdit1.Text.Trim();
+
+            // اگر متن placeholder است، هیچ کاری نکن
+            if (keyword == "جستجو ...")
+                return;
+
+            // اگر جستجو خالی شد، لیست کامل را نمایش بده
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                await LoadReceiptsAsync(false);
+                return;
+            }
+
+            try
+            {
+                // جستجو در رسیدهای تأیید شده
+                var searchResults = await _goodsReceiptService.SearchReceipts(keyword, (int)dungeonNumeric1.Value);
+                poisonDataGridView1.DataSource = searchResults.ToList();
+                DgvPersian();
+                CustomizeDataGridView();
+
+                if (!searchResults.Any())
+                    MessageBox.Show("هیچ رسید تأیید شده‌ای با عبارت مورد نظر یافت نشد.", "نتیجه جستجو",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطا در جستجو: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

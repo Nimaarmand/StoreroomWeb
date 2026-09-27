@@ -23,7 +23,7 @@ namespace StoreRoom.Forms
         private async Task LoadCategoriesAsync(bool showEmptyMessage = false)
         {
             int count = (int)dungeonNumeric1.Value;
-            if (count <= 0) count = 20; 
+            if (count <= 0) count = 20;
 
             var categories = await _categoryService.GetTopCategoryAsync(count);
             poisonDataGridView1.DataSource = categories.ToList();
@@ -115,25 +115,37 @@ namespace StoreRoom.Forms
             }
         }
 
-        // جستجوی زنده هنگام تایپ در تکست‌باکس
+        // ✅ جستجوی زنده اصلاح‌شده (بدون تغییر نام رویداد)
         private async void textBoxEdit1_TextChanged(object sender, EventArgs e)
         {
-            string name = textBoxEdit1.Text.Trim();
+            string keyword = textBoxEdit1.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(name))
+            // اگر متن placeholder است، هیچ کاری نکن (از جستجو جلوگیری کن)
+            if (keyword == "جستجو ...")
+                return;
+
+            // اگر جستجو خالی شد، لیست کامل را نمایش بده
+            if (string.IsNullOrWhiteSpace(keyword))
             {
                 await LoadCategoriesAsync(showEmptyMessage: false);
                 return;
             }
 
-            var searchResults = await _categoryService.SearchByNameAsync(name);
-            poisonDataGridView1.DataSource = searchResults.ToList();
-            DgvPersian();
-            CustomizeDataGridView();
+            try
+            {
+                var searchResults = await _categoryService.SearchByNameAsync(keyword);
+                poisonDataGridView1.DataSource = searchResults.ToList();
+                DgvPersian();
+                CustomizeDataGridView();
 
-            if (!searchResults.Any())
-                MessageBox.Show("هیچ دسته‌بندی با این نام یافت نشد.", "نتیجه جستجو",
-                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!searchResults.Any())
+                    MessageBox.Show("هیچ دسته‌بندی با این نام یافت نشد.", "نتیجه جستجو",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطا در جستجو: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // دریافت شناسه دسته‌بندی انتخاب‌شده با کلیک روی سطر

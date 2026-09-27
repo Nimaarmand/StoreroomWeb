@@ -176,6 +176,7 @@
             poisonDataGridView1.Size = new Size(1023, 315);
             poisonDataGridView1.TabIndex = 0;
             poisonDataGridView1.CellClick += poisonDataGridView1_CellClick;
+            poisonDataGridView1.CellFormatting += poisonDataGridView1_CellFormatting;
             // 
             // poisonContextMenuStrip1
             // 
@@ -183,39 +184,40 @@
             poisonContextMenuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem1, toolStripMenuItem2, toolStripMenuItem3, toolStripMenuItem4 });
             poisonContextMenuStrip1.Name = "poisonContextMenuStrip1";
             poisonContextMenuStrip1.RightToLeft = RightToLeft.Yes;
-            poisonContextMenuStrip1.Size = new Size(181, 122);
+            poisonContextMenuStrip1.Size = new Size(180, 100);
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(180, 24);
+            toolStripMenuItem1.Size = new Size(179, 24);
             toolStripMenuItem1.Text = "ویرایش";
             toolStripMenuItem1.Click += toolStripMenuItem1_Click;
             // 
             // toolStripMenuItem2
             // 
             toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new Size(180, 24);
+            toolStripMenuItem2.Size = new Size(179, 24);
             toolStripMenuItem2.Text = "حذف";
+            toolStripMenuItem2.Click += toolStripMenuItem2_Click;
             // 
             // toolStripMenuItem3
             // 
             toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(180, 24);
+            toolStripMenuItem3.Size = new Size(179, 24);
             toolStripMenuItem3.Text = "ثبت ورود کالا";
             toolStripMenuItem3.Click += toolStripMenuItem3_Click;
             // 
             // toolStripMenuItem4
             // 
             toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(180, 24);
+            toolStripMenuItem4.Size = new Size(179, 24);
             toolStripMenuItem4.Text = "ثبت خروج کالا";
             toolStripMenuItem4.Click += toolStripMenuItem4_Click;
             // 
             // Form7
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1030, 664);
             Controls.Add(panel1);
             Controls.Add(textBoxEdit1);

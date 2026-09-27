@@ -67,16 +67,21 @@ namespace StoreRoom.Forms
             var form20 = Program.ServiceProvider.GetRequiredService<Form20>();
             form20.ShowDialog();
         }
-
+        
         private void Form14_Load(object sender, EventArgs e)
         {
+           
             textBoxEdit2.UseSystemPasswordChar = true;
+
+
         }
 
         private void materialCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
             textBoxEdit2.UseSystemPasswordChar = !materialCheckBox1.Checked;
         }
+
+       
     }
 }
 

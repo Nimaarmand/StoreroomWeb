@@ -44,9 +44,9 @@
             label3.Location = new Point(419, 78);
             label3.Margin = new Padding(4, 0, 4, 0);
             label3.Name = "label3";
-            label3.Size = new Size(96, 19);
+            label3.Size = new Size(109, 19);
             label3.TabIndex = 22;
-            label3.Text = "نام کاربری :";
+            label3.Text = "شماره تلفن :";
             // 
             // textBoxEdit2
             // 
@@ -61,7 +61,7 @@
             textBoxEdit2.Multiline = false;
             textBoxEdit2.Name = "textBoxEdit2";
             textBoxEdit2.ReadOnly = false;
-            textBoxEdit2.RightToLeft = RightToLeft.Yes;
+            textBoxEdit2.RightToLeft = RightToLeft.No;
             textBoxEdit2.Size = new Size(373, 43);
             textBoxEdit2.TabIndex = 1;
             textBoxEdit2.TextAlignment = HorizontalAlignment.Left;
@@ -91,6 +91,7 @@
             textBoxEdit1.Multiline = false;
             textBoxEdit1.Name = "textBoxEdit1";
             textBoxEdit1.ReadOnly = false;
+            textBoxEdit1.RightToLeft = RightToLeft.No;
             textBoxEdit1.Size = new Size(373, 43);
             textBoxEdit1.TabIndex = 0;
             textBoxEdit1.TextAlignment = HorizontalAlignment.Left;
@@ -149,8 +150,8 @@
             // 
             // Form14
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(554, 430);
             Controls.Add(foreverButton2);
             Controls.Add(materialCheckBox1);

@@ -59,6 +59,7 @@
             textBoxEdit1.TabIndex = 7;
             textBoxEdit1.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit1.UseSystemPasswordChar = false;
+            textBoxEdit1.TextChanged += textBoxEdit1_TextChanged;
             textBoxEdit1.Enter += textBoxEdit1_Enter;
             // 
             // flowLayoutPanel1
@@ -173,8 +174,8 @@
             // 
             // Form23
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1143, 570);
             Controls.Add(panel1);
             Controls.Add(flowLayoutPanel1);

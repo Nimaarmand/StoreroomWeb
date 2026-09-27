@@ -157,6 +157,7 @@
             poisonDataGridView1.Size = new Size(1106, 356);
             poisonDataGridView1.TabIndex = 7;
             poisonDataGridView1.CellClick += poisonDataGridView1_CellClick;
+            poisonDataGridView1.CellFormatting += poisonDataGridView1_CellFormatting;
             // 
             // poisonContextMenuStrip1
             // 
@@ -205,11 +206,13 @@
             textBoxEdit1.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit1.UseSystemPasswordChar = false;
             textBoxEdit1.TextChanged += textBoxEdit1_TextChanged;
+            textBoxEdit1.Enter += textBoxEdit1_Enter_1;
+            textBoxEdit1.Leave += textBoxEdit1_Leave_1;
             // 
             // Form21
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1113, 656);
             Controls.Add(textBoxEdit1);
             Controls.Add(panel1);
@@ -220,7 +223,6 @@
             Padding = new Padding(3, 64, 4, 4);
             RightToLeft = RightToLeft.Yes;
             Text = "لیست ورودی";
-            Load += Form21_Load_1;
             flowLayoutPanel1.ResumeLayout(false);
             panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)poisonDataGridView1).EndInit();

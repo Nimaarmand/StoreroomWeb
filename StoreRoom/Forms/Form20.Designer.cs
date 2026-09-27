@@ -208,8 +208,8 @@
             // 
             // Form20
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(487, 525);
             Controls.Add(panel2);
             Controls.Add(panel1);

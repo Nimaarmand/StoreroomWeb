@@ -202,8 +202,8 @@
             // 
             // Form10
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1113, 695);
             Controls.Add(textBoxEdit1);
             Controls.Add(panel1);

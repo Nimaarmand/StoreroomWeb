@@ -21,7 +21,7 @@ namespace Domain.Entity
         public string ScannedBarcode { get; set; } // بارکد اسکن شده (در صورت وجود)
 
         [Required]
-        public decimal Quantity { get; set; } // تعداد یا مقدار ورودی
+        public int Quantity { get; set; } // تعداد یا مقدار ورودی
 
         [Required]
         [MaxLength(20)]
@@ -58,9 +58,18 @@ namespace Domain.Entity
         public DateTime CreatedAt { get; set; } = DateTime.Now; // تاریخ ثبت رکورد در سیستم
 
         public string? UserId { get; set; } // شناسه کاربر ثبت‌کننده
-        [ForeignKey("UserId")]
-       
 
+        public string UserFullName { get; set; } //کاربر ثبت کننده
+        /// <summary>
+        /// شناسه کاربر تأییدکننده رسید
+        /// </summary>
+        public string? ApprovedByUserId { get; set; }
+
+        /// <summary>
+        /// نام کامل کاربر تأییدکننده
+        /// </summary>
+        [MaxLength(100)]
+        public string? ApprovedByFullName { get; set; }
         [Required]
         public byte Status { get; set; } = 0; // وضعیت ورودی (مثلاً ۰ = در انتظار تأیید، ۱ = تأیید شده)
 

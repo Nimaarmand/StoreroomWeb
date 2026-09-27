@@ -183,8 +183,8 @@
             // 
             // Form3
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(886, 398);
             Controls.Add(panel1);
             Font = new Font("Tahoma", 12F, FontStyle.Bold);

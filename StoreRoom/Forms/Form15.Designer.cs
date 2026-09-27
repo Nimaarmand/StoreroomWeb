@@ -29,6 +29,12 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            comboBoxEdit1 = new ReaLTaiizor.Controls.ComboBoxEdit();
+            label10 = new Label();
+            label8 = new Label();
+            label7 = new Label();
+            label6 = new Label();
+            label5 = new Label();
             label4 = new Label();
             label3 = new Label();
             label2 = new Label();
@@ -44,12 +50,6 @@
             foreverButton1 = new ReaLTaiizor.Controls.ForeverButton();
             label1 = new Label();
             textBoxEdit1 = new ReaLTaiizor.Controls.TextBoxEdit();
-            label5 = new Label();
-            label6 = new Label();
-            label7 = new Label();
-            label8 = new Label();
-            label10 = new Label();
-            comboBoxEdit1 = new ReaLTaiizor.Controls.ComboBoxEdit();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -83,6 +83,76 @@
             panel1.RightToLeft = RightToLeft.Yes;
             panel1.Size = new Size(823, 619);
             panel1.TabIndex = 0;
+            // 
+            // comboBoxEdit1
+            // 
+            comboBoxEdit1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            comboBoxEdit1.BackColor = Color.FromArgb(246, 246, 246);
+            comboBoxEdit1.DrawMode = DrawMode.OwnerDrawFixed;
+            comboBoxEdit1.DropDownHeight = 100;
+            comboBoxEdit1.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxEdit1.Font = new Font("Tahoma", 12F, FontStyle.Bold);
+            comboBoxEdit1.ForeColor = Color.Black;
+            comboBoxEdit1.FormattingEnabled = true;
+            comboBoxEdit1.HoverSelectionColor = Color.FromArgb(241, 241, 241);
+            comboBoxEdit1.IntegralHeight = false;
+            comboBoxEdit1.ItemHeight = 20;
+            comboBoxEdit1.Items.AddRange(new object[] { "گرم ", "کیلوگرم", "تُن", "عددی", "بسته ای", "متری" });
+            comboBoxEdit1.Location = new Point(490, 278);
+            comboBoxEdit1.Name = "comboBoxEdit1";
+            comboBoxEdit1.Size = new Size(261, 26);
+            comboBoxEdit1.StartIndex = 0;
+            comboBoxEdit1.TabIndex = 48;
+            // 
+            // label10
+            // 
+            label10.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label10.AutoSize = true;
+            label10.Location = new Point(757, 278);
+            label10.Name = "label10";
+            label10.Size = new Size(53, 19);
+            label10.TabIndex = 47;
+            label10.Text = "واحد :";
+            // 
+            // label8
+            // 
+            label8.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label8.AutoSize = true;
+            label8.Location = new Point(308, 361);
+            label8.Name = "label8";
+            label8.Size = new Size(74, 19);
+            label8.TabIndex = 46;
+            label8.Text = "وضعیت :";
+            // 
+            // label7
+            // 
+            label7.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label7.AutoSize = true;
+            label7.Location = new Point(317, 440);
+            label7.Name = "label7";
+            label7.Size = new Size(78, 19);
+            label7.TabIndex = 45;
+            label7.Text = "مشتری :";
+            // 
+            // label6
+            // 
+            label6.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label6.AutoSize = true;
+            label6.Location = new Point(758, 357);
+            label6.Name = "label6";
+            label6.Size = new Size(61, 19);
+            label6.TabIndex = 44;
+            label6.Text = "حواله :";
+            // 
+            // label5
+            // 
+            label5.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label5.AutoSize = true;
+            label5.Location = new Point(754, 437);
+            label5.Name = "label5";
+            label5.Size = new Size(47, 19);
+            label5.TabIndex = 43;
+            label5.Text = "انبار :";
             // 
             // label4
             // 
@@ -303,87 +373,17 @@
             textBoxEdit1.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit1.UseSystemPasswordChar = false;
             // 
-            // label5
-            // 
-            label5.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label5.AutoSize = true;
-            label5.Location = new Point(754, 437);
-            label5.Name = "label5";
-            label5.Size = new Size(47, 19);
-            label5.TabIndex = 43;
-            label5.Text = "انبار :";
-            // 
-            // label6
-            // 
-            label6.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label6.AutoSize = true;
-            label6.Location = new Point(758, 357);
-            label6.Name = "label6";
-            label6.Size = new Size(61, 19);
-            label6.TabIndex = 44;
-            label6.Text = "حواله :";
-            // 
-            // label7
-            // 
-            label7.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label7.AutoSize = true;
-            label7.Location = new Point(317, 440);
-            label7.Name = "label7";
-            label7.Size = new Size(78, 19);
-            label7.TabIndex = 45;
-            label7.Text = "مشتری :";
-            // 
-            // label8
-            // 
-            label8.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label8.AutoSize = true;
-            label8.Location = new Point(308, 361);
-            label8.Name = "label8";
-            label8.Size = new Size(74, 19);
-            label8.TabIndex = 46;
-            label8.Text = "وضعیت :";
-            // 
-            // label10
-            // 
-            label10.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label10.AutoSize = true;
-            label10.Location = new Point(757, 278);
-            label10.Name = "label10";
-            label10.Size = new Size(53, 19);
-            label10.TabIndex = 47;
-            label10.Text = "واحد :";
-            // 
-            // comboBoxEdit1
-            // 
-            comboBoxEdit1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            comboBoxEdit1.BackColor = Color.FromArgb(246, 246, 246);
-            comboBoxEdit1.DrawMode = DrawMode.OwnerDrawFixed;
-            comboBoxEdit1.DropDownHeight = 100;
-            comboBoxEdit1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBoxEdit1.Font = new Font("Tahoma", 12F, FontStyle.Bold);
-            comboBoxEdit1.ForeColor = Color.Black;
-            comboBoxEdit1.FormattingEnabled = true;
-            comboBoxEdit1.HoverSelectionColor = Color.FromArgb(241, 241, 241);
-            comboBoxEdit1.IntegralHeight = false;
-            comboBoxEdit1.ItemHeight = 20;
-            comboBoxEdit1.Items.AddRange(new object[] { "گرم ", "کیلوگرم", "تُن", "عددی", "بسته ای", "متری" });
-            comboBoxEdit1.Location = new Point(490, 278);
-            comboBoxEdit1.Name = "comboBoxEdit1";
-            comboBoxEdit1.Size = new Size(261, 26);
-            comboBoxEdit1.StartIndex = 0;
-            comboBoxEdit1.TabIndex = 48;
-            // 
             // Form15
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(830, 687);
             Controls.Add(panel1);
             Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             Margin = new Padding(4);
             Name = "Form15";
             Padding = new Padding(3, 64, 4, 4);
-            Text = "Test";
+            Text = "ثبت خروج";
             Load += Test_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

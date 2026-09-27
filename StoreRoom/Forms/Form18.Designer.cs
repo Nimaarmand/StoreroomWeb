@@ -124,8 +124,8 @@
             // 
             // Form18
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(364, 311);
             Controls.Add(foreverButton2);
             Controls.Add(foreverButton1);

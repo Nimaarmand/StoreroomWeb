@@ -40,6 +40,10 @@ namespace StoreRoom.Forms
         // بارگذاری اطلاعات در حالت ویرایش
         private async void Form3_Load(object sender, EventArgs e)
         {
+            var screen = Screen.FromControl(this);
+            this.StartPosition = FormStartPosition.Manual;
+            this.Left = screen.WorkingArea.Left + (screen.WorkingArea.Width - this.Width) / 2;
+            this.Top = screen.WorkingArea.Top + (screen.WorkingArea.Height - this.Height) / 2;
             if (_supplierId != 0)
             {
                 var supplier = await _supplierService.GetByIdAsync(_supplierId);
@@ -117,7 +121,7 @@ namespace StoreRoom.Forms
                     existing.EconomicCode = string.IsNullOrWhiteSpace(economicCode) ? null : economicCode;
                     existing.Address = string.IsNullOrWhiteSpace(address) ? null : address;
                     await _supplierService.UpdateAsync(existing);
-                    MessageBox.Show("تأمین‌کننده با موفقیت بروزرسانی شد.", "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("تأمین‌کننده با موفقیت بروزرسانی شد.", "Name", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ResetToAddMode(); // پس از بروزرسانی، فرم به حالت درج جدید بازمی‌گردد
                 }
             }
@@ -132,5 +136,7 @@ namespace StoreRoom.Forms
         {
             await SaveSupplier();
         }
+
+       
     }
 }

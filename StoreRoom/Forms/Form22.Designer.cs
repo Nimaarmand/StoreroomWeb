@@ -209,8 +209,8 @@
             // 
             // Form22
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1048, 652);
             ContextMenuStrip = poisonContextMenuStrip1;
             Controls.Add(textBoxEdit1);

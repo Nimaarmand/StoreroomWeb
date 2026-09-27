@@ -29,14 +29,17 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            label8 = new Label();
+            dateTimePicker2 = new DateTimePicker();
+            label7 = new Label();
+            dateTimePicker1 = new DateTimePicker();
+            label11 = new Label();
+            comboBoxEdit5 = new ReaLTaiizor.Controls.ComboBoxEdit();
             label10 = new Label();
             textBoxEdit7 = new ReaLTaiizor.Controls.TextBoxEdit();
             label9 = new Label();
             textBoxEdit6 = new ReaLTaiizor.Controls.TextBoxEdit();
-            label8 = new Label();
-            label7 = new Label();
-            dateTimePicker2 = new DateTimePicker();
-            dateTimePicker1 = new DateTimePicker();
             label6 = new Label();
             comboBoxEdit1 = new ReaLTaiizor.Controls.ComboBoxEdit();
             foreverButton1 = new ReaLTaiizor.Controls.ForeverButton();
@@ -50,19 +53,20 @@
             textBoxEdit2 = new ReaLTaiizor.Controls.TextBoxEdit();
             label1 = new Label();
             textBoxEdit1 = new ReaLTaiizor.Controls.TextBoxEdit();
+            sqlDataAdapter1 = new Microsoft.Data.SqlClient.SqlDataAdapter();
             panel1.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Controls.Add(tableLayoutPanel1);
+            panel1.Controls.Add(label11);
+            panel1.Controls.Add(comboBoxEdit5);
             panel1.Controls.Add(label10);
             panel1.Controls.Add(textBoxEdit7);
             panel1.Controls.Add(label9);
             panel1.Controls.Add(textBoxEdit6);
-            panel1.Controls.Add(label8);
-            panel1.Controls.Add(label7);
-            panel1.Controls.Add(dateTimePicker2);
-            panel1.Controls.Add(dateTimePicker1);
             panel1.Controls.Add(label6);
             panel1.Controls.Add(comboBoxEdit1);
             panel1.Controls.Add(foreverButton1);
@@ -82,11 +86,97 @@
             panel1.Size = new Size(1137, 549);
             panel1.TabIndex = 1;
             // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            tableLayoutPanel1.ColumnCount = 2;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 38.80597F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 61.19403F));
+            tableLayoutPanel1.Controls.Add(label8, 0, 0);
+            tableLayoutPanel1.Controls.Add(dateTimePicker2, 0, 1);
+            tableLayoutPanel1.Controls.Add(label7, 1, 0);
+            tableLayoutPanel1.Controls.Add(dateTimePicker1, 1, 1);
+            tableLayoutPanel1.Location = new Point(384, 354);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RightToLeft = RightToLeft.No;
+            tableLayoutPanel1.RowCount = 2;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Size = new Size(670, 100);
+            tableLayoutPanel1.TabIndex = 46;
+            // 
+            // label8
+            // 
+            label8.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label8.AutoSize = true;
+            label8.Location = new Point(169, 0);
+            label8.Name = "label8";
+            label8.Size = new Size(88, 19);
+            label8.TabIndex = 19;
+            label8.Text = "تاریخ انقضا";
+            // 
+            // dateTimePicker2
+            // 
+            dateTimePicker2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            dateTimePicker2.Format = DateTimePickerFormat.Short;
+            dateTimePicker2.Location = new Point(28, 53);
+            dateTimePicker2.Name = "dateTimePicker2";
+            dateTimePicker2.Size = new Size(229, 27);
+            dateTimePicker2.TabIndex = 9;
+            // 
+            // label7
+            // 
+            label7.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label7.AutoSize = true;
+            label7.Location = new Point(584, 0);
+            label7.Name = "label7";
+            label7.Size = new Size(83, 19);
+            label7.TabIndex = 18;
+            label7.Text = "تاریخ تولید";
+            // 
+            // dateTimePicker1
+            // 
+            dateTimePicker1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            dateTimePicker1.Format = DateTimePickerFormat.Short;
+            dateTimePicker1.Location = new Point(413, 53);
+            dateTimePicker1.Name = "dateTimePicker1";
+            dateTimePicker1.Size = new Size(254, 27);
+            dateTimePicker1.TabIndex = 8;
+            // 
+            // label11
+            // 
+            label11.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            label11.AutoSize = true;
+            label11.Location = new Point(651, 460);
+            label11.Name = "label11";
+            label11.Size = new Size(105, 19);
+            label11.TabIndex = 45;
+            label11.Text = "دسته بندی :";
+            // 
+            // comboBoxEdit5
+            // 
+            comboBoxEdit5.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            comboBoxEdit5.BackColor = Color.FromArgb(246, 246, 246);
+            comboBoxEdit5.DrawMode = DrawMode.OwnerDrawFixed;
+            comboBoxEdit5.DropDownHeight = 100;
+            comboBoxEdit5.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxEdit5.Font = new Font("Tahoma", 12F, FontStyle.Bold);
+            comboBoxEdit5.ForeColor = Color.Black;
+            comboBoxEdit5.FormattingEnabled = true;
+            comboBoxEdit5.HoverSelectionColor = Color.FromArgb(241, 241, 241);
+            comboBoxEdit5.IntegralHeight = false;
+            comboBoxEdit5.ItemHeight = 20;
+            comboBoxEdit5.Location = new Point(384, 460);
+            comboBoxEdit5.Name = "comboBoxEdit5";
+            comboBoxEdit5.Size = new Size(261, 26);
+            comboBoxEdit5.StartIndex = 0;
+            comboBoxEdit5.TabIndex = 44;
+            // 
             // label10
             // 
             label10.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label10.AutoSize = true;
-            label10.Location = new Point(451, 283);
+            label10.Location = new Point(651, 283);
             label10.Name = "label10";
             label10.Size = new Size(47, 19);
             label10.TabIndex = 23;
@@ -99,13 +189,13 @@
             textBoxEdit7.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textBoxEdit7.ForeColor = Color.White;
             textBoxEdit7.Image = null;
-            textBoxEdit7.Location = new Point(185, 283);
+            textBoxEdit7.Location = new Point(384, 283);
             textBoxEdit7.MaxLength = 32767;
             textBoxEdit7.Multiline = false;
             textBoxEdit7.Name = "textBoxEdit7";
             textBoxEdit7.ReadOnly = false;
             textBoxEdit7.Size = new Size(261, 43);
-            textBoxEdit7.TabIndex = 22;
+            textBoxEdit7.TabIndex = 6;
             textBoxEdit7.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit7.UseSystemPasswordChar = false;
             // 
@@ -113,7 +203,7 @@
             // 
             label9.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label9.AutoSize = true;
-            label9.Location = new Point(1023, 185);
+            label9.Location = new Point(1049, 161);
             label9.Name = "label9";
             label9.Size = new Size(85, 19);
             label9.TabIndex = 21;
@@ -126,57 +216,21 @@
             textBoxEdit6.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textBoxEdit6.ForeColor = Color.White;
             textBoxEdit6.Image = null;
-            textBoxEdit6.Location = new Point(757, 185);
+            textBoxEdit6.Location = new Point(790, 161);
             textBoxEdit6.MaxLength = 32767;
             textBoxEdit6.Multiline = false;
             textBoxEdit6.Name = "textBoxEdit6";
             textBoxEdit6.ReadOnly = false;
-            textBoxEdit6.Size = new Size(261, 43);
-            textBoxEdit6.TabIndex = 20;
+            textBoxEdit6.Size = new Size(239, 43);
+            textBoxEdit6.TabIndex = 2;
             textBoxEdit6.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit6.UseSystemPasswordChar = false;
-            // 
-            // label8
-            // 
-            label8.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label8.AutoSize = true;
-            label8.Location = new Point(1023, 390);
-            label8.Name = "label8";
-            label8.Size = new Size(99, 19);
-            label8.TabIndex = 19;
-            label8.Text = "تاریخ انقضا :";
-            // 
-            // label7
-            // 
-            label7.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            label7.AutoSize = true;
-            label7.Location = new Point(451, 390);
-            label7.Name = "label7";
-            label7.Size = new Size(94, 19);
-            label7.TabIndex = 18;
-            label7.Text = "تاریخ تولید :";
-            // 
-            // dateTimePicker2
-            // 
-            dateTimePicker2.Format = DateTimePickerFormat.Short;
-            dateTimePicker2.Location = new Point(757, 390);
-            dateTimePicker2.Name = "dateTimePicker2";
-            dateTimePicker2.Size = new Size(261, 27);
-            dateTimePicker2.TabIndex = 17;
-            // 
-            // dateTimePicker1
-            // 
-            dateTimePicker1.Format = DateTimePickerFormat.Short;
-            dateTimePicker1.Location = new Point(184, 390);
-            dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(261, 27);
-            dateTimePicker1.TabIndex = 16;
             // 
             // label6
             // 
             label6.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label6.AutoSize = true;
-            label6.Location = new Point(1023, 286);
+            label6.Location = new Point(1049, 286);
             label6.Name = "label6";
             label6.Size = new Size(53, 19);
             label6.TabIndex = 15;
@@ -196,11 +250,11 @@
             comboBoxEdit1.IntegralHeight = false;
             comboBoxEdit1.ItemHeight = 20;
             comboBoxEdit1.Items.AddRange(new object[] { "گرم ", "کیلوگرم", "تُن", "عددی", "بسته ای", "متری" });
-            comboBoxEdit1.Location = new Point(757, 283);
+            comboBoxEdit1.Location = new Point(799, 283);
             comboBoxEdit1.Name = "comboBoxEdit1";
-            comboBoxEdit1.Size = new Size(261, 26);
+            comboBoxEdit1.Size = new Size(239, 26);
             comboBoxEdit1.StartIndex = 0;
-            comboBoxEdit1.TabIndex = 14;
+            comboBoxEdit1.TabIndex = 7;
             // 
             // foreverButton1
             // 
@@ -221,7 +275,7 @@
             // 
             label5.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label5.AutoSize = true;
-            label5.Location = new Point(451, 185);
+            label5.Location = new Point(651, 185);
             label5.Name = "label5";
             label5.Size = new Size(87, 19);
             label5.TabIndex = 11;
@@ -234,13 +288,13 @@
             textBoxEdit5.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textBoxEdit5.ForeColor = Color.White;
             textBoxEdit5.Image = null;
-            textBoxEdit5.Location = new Point(185, 185);
+            textBoxEdit5.Location = new Point(384, 185);
             textBoxEdit5.MaxLength = 32767;
             textBoxEdit5.Multiline = false;
             textBoxEdit5.Name = "textBoxEdit5";
             textBoxEdit5.ReadOnly = false;
             textBoxEdit5.Size = new Size(261, 43);
-            textBoxEdit5.TabIndex = 10;
+            textBoxEdit5.TabIndex = 5;
             textBoxEdit5.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit5.UseSystemPasswordChar = false;
             // 
@@ -248,7 +302,7 @@
             // 
             label4.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label4.AutoSize = true;
-            label4.Location = new Point(451, 93);
+            label4.Location = new Point(651, 93);
             label4.Name = "label4";
             label4.Size = new Size(67, 19);
             label4.TabIndex = 9;
@@ -261,13 +315,13 @@
             textBoxEdit4.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textBoxEdit4.ForeColor = Color.White;
             textBoxEdit4.Image = null;
-            textBoxEdit4.Location = new Point(185, 93);
+            textBoxEdit4.Location = new Point(384, 93);
             textBoxEdit4.MaxLength = 32767;
             textBoxEdit4.Multiline = false;
             textBoxEdit4.Name = "textBoxEdit4";
             textBoxEdit4.ReadOnly = false;
             textBoxEdit4.Size = new Size(261, 43);
-            textBoxEdit4.TabIndex = 8;
+            textBoxEdit4.TabIndex = 4;
             textBoxEdit4.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit4.UseSystemPasswordChar = false;
             // 
@@ -275,7 +329,7 @@
             // 
             label3.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label3.AutoSize = true;
-            label3.Location = new Point(451, 3);
+            label3.Location = new Point(651, 3);
             label3.Name = "label3";
             label3.Size = new Size(73, 19);
             label3.TabIndex = 7;
@@ -288,13 +342,13 @@
             textBoxEdit3.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textBoxEdit3.ForeColor = Color.White;
             textBoxEdit3.Image = null;
-            textBoxEdit3.Location = new Point(185, 3);
+            textBoxEdit3.Location = new Point(384, 3);
             textBoxEdit3.MaxLength = 32767;
             textBoxEdit3.Multiline = false;
             textBoxEdit3.Name = "textBoxEdit3";
             textBoxEdit3.ReadOnly = false;
             textBoxEdit3.Size = new Size(261, 43);
-            textBoxEdit3.TabIndex = 6;
+            textBoxEdit3.TabIndex = 3;
             textBoxEdit3.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit3.UseSystemPasswordChar = false;
             // 
@@ -302,7 +356,7 @@
             // 
             label2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label2.AutoSize = true;
-            label2.Location = new Point(1023, 93);
+            label2.Location = new Point(1049, 78);
             label2.Name = "label2";
             label2.Size = new Size(41, 19);
             label2.TabIndex = 5;
@@ -315,13 +369,13 @@
             textBoxEdit2.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textBoxEdit2.ForeColor = Color.White;
             textBoxEdit2.Image = null;
-            textBoxEdit2.Location = new Point(757, 93);
+            textBoxEdit2.Location = new Point(790, 78);
             textBoxEdit2.MaxLength = 32767;
             textBoxEdit2.Multiline = false;
             textBoxEdit2.Name = "textBoxEdit2";
             textBoxEdit2.ReadOnly = false;
-            textBoxEdit2.Size = new Size(261, 43);
-            textBoxEdit2.TabIndex = 4;
+            textBoxEdit2.Size = new Size(239, 43);
+            textBoxEdit2.TabIndex = 1;
             textBoxEdit2.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit2.UseSystemPasswordChar = false;
             // 
@@ -329,7 +383,7 @@
             // 
             label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             label1.AutoSize = true;
-            label1.Location = new Point(1023, 3);
+            label1.Location = new Point(1049, 3);
             label1.Name = "label1";
             label1.Size = new Size(55, 19);
             label1.TabIndex = 3;
@@ -342,20 +396,20 @@
             textBoxEdit1.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             textBoxEdit1.ForeColor = Color.White;
             textBoxEdit1.Image = null;
-            textBoxEdit1.Location = new Point(757, 3);
+            textBoxEdit1.Location = new Point(790, 3);
             textBoxEdit1.MaxLength = 32767;
             textBoxEdit1.Multiline = false;
             textBoxEdit1.Name = "textBoxEdit1";
             textBoxEdit1.ReadOnly = false;
-            textBoxEdit1.Size = new Size(261, 43);
-            textBoxEdit1.TabIndex = 2;
+            textBoxEdit1.Size = new Size(239, 43);
+            textBoxEdit1.TabIndex = 0;
             textBoxEdit1.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit1.UseSystemPasswordChar = false;
             // 
             // Form5
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1143, 616);
             Controls.Add(panel1);
             Font = new Font("Tahoma", 12F, FontStyle.Bold);
@@ -367,32 +421,38 @@
             Load += Form5_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
         private Panel panel1;
+        private Label label11;
+        private ReaLTaiizor.Controls.ComboBoxEdit comboBoxEdit5;
+        private Label label10;
+        private Label label9;
+        private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit6;
+        private Label label8;
+        private Label label7;
+        private DateTimePicker dateTimePicker2;
+        private DateTimePicker dateTimePicker1;
+        private Label label6;
+        private ReaLTaiizor.Controls.ComboBoxEdit comboBoxEdit1;
+        private ReaLTaiizor.Controls.ForeverButton foreverButton1;
+        private Label label5;
+        private Label label4;
+        private Label label3;
         private Label label2;
         private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit2;
         private Label label1;
         private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit1;
-        private Label label4;
-        private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit4;
-        private Label label3;
         private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit3;
-        private Label label5;
+        private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit4;
         private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit5;
-        private ReaLTaiizor.Controls.ForeverButton foreverButton1;
-        private Label label6;
-        private ReaLTaiizor.Controls.ComboBoxEdit comboBoxEdit1;
-        private DateTimePicker dateTimePicker1;
-        private Label label8;
-        private Label label7;
-        private DateTimePicker dateTimePicker2;
-        private Label label9;
-        private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit6;
-        private Label label10;
         private ReaLTaiizor.Controls.TextBoxEdit textBoxEdit7;
+        private TableLayoutPanel tableLayoutPanel1;
+        private Microsoft.Data.SqlClient.SqlDataAdapter sqlDataAdapter1;
     }
 }

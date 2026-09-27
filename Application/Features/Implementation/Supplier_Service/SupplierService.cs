@@ -63,7 +63,7 @@ namespace Application.Features.Implementation.Supplier_Service
         public async Task<IEnumerable<Supplier>> SearchAsync(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
-                return await GetAllAsync(); // GetAllAsync خودش قفل دارد
+                return await GetAllAsync(); 
 
             keyword = keyword.Trim();
             await DbLock.Semaphore.WaitAsync();
@@ -115,7 +115,7 @@ namespace Application.Features.Implementation.Supplier_Service
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            await DbLock.Semaphore.WaitAsync();
+          
             try
             {
                 if (await IsPhoneDuplicateAsync(entity.Phone, entity.SupplierId))
@@ -125,8 +125,9 @@ namespace Application.Features.Implementation.Supplier_Service
             }
             finally
             {
-                DbLock.Semaphore.Release();
+               
             }
         }
+       
     }
 }

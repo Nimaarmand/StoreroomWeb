@@ -37,10 +37,10 @@
             dungeonNumeric1 = new ReaLTaiizor.Controls.DungeonNumeric();
             panel1 = new Panel();
             poisonDataGridView1 = new ReaLTaiizor.Controls.PoisonDataGridView();
-            textBoxEdit1 = new ReaLTaiizor.Controls.TextBoxEdit();
             poisonContextMenuStrip1 = new ReaLTaiizor.Controls.PoisonContextMenuStrip(components);
             toolStripMenuItem1 = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripMenuItem();
+            textBoxEdit1 = new ReaLTaiizor.Controls.TextBoxEdit();
             flowLayoutPanel1.SuspendLayout();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)poisonDataGridView1).BeginInit();
@@ -126,6 +126,7 @@
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
             poisonDataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             poisonDataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            poisonDataGridView1.ContextMenuStrip = poisonContextMenuStrip1;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.FromArgb(255, 255, 255);
             dataGridViewCellStyle2.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -156,6 +157,28 @@
             poisonDataGridView1.TabIndex = 0;
             poisonDataGridView1.CellClick += poisonDataGridView1_CellClick;
             // 
+            // poisonContextMenuStrip1
+            // 
+            poisonContextMenuStrip1.Font = new Font("Tahoma", 12F, FontStyle.Bold);
+            poisonContextMenuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem1, toolStripMenuItem2 });
+            poisonContextMenuStrip1.Name = "poisonContextMenuStrip1";
+            poisonContextMenuStrip1.RightToLeft = RightToLeft.Yes;
+            poisonContextMenuStrip1.Size = new Size(132, 52);
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(131, 24);
+            toolStripMenuItem1.Text = "ویرایش";
+            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(131, 24);
+            toolStripMenuItem2.Text = "حذف";
+            toolStripMenuItem2.Click += toolStripMenuItem2_Click;
+            // 
             // textBoxEdit1
             // 
             textBoxEdit1.BackColor = Color.Transparent;
@@ -176,31 +199,10 @@
             textBoxEdit1.TextChanged += textBoxEdit1_TextChanged_1;
             textBoxEdit1.Enter += textBoxEdit1_Enter;
             // 
-            // poisonContextMenuStrip1
-            // 
-            poisonContextMenuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem1, toolStripMenuItem2 });
-            poisonContextMenuStrip1.Name = "poisonContextMenuStrip1";
-            poisonContextMenuStrip1.RightToLeft = RightToLeft.Yes;
-            poisonContextMenuStrip1.Size = new Size(111, 48);
-            // 
-            // toolStripMenuItem1
-            // 
-            toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(110, 22);
-            toolStripMenuItem1.Text = "ویرایش";
-            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
-            // 
-            // toolStripMenuItem2
-            // 
-            toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new Size(110, 22);
-            toolStripMenuItem2.Text = "حذف";
-            toolStripMenuItem2.Click += toolStripMenuItem2_Click;
-            // 
             // Form8
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1143, 570);
             Controls.Add(textBoxEdit1);
             Controls.Add(panel1);

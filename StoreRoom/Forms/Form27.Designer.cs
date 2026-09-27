@@ -1,6 +1,6 @@
 ﻿namespace StoreRoom.Forms
 {
-    partial class Form25
+    partial class Form27
     {
         /// <summary>
         /// Required designer variable.
@@ -28,13 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form25));
             panel1 = new Panel();
             label1 = new Label();
             cyberProgressBar1 = new ReaLTaiizor.Controls.CyberProgressBar();
             pictureBox1 = new PictureBox();
+            pictureBox2 = new PictureBox();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             SuspendLayout();
             // 
             // panel1
@@ -44,15 +45,15 @@
             panel1.Controls.Add(cyberProgressBar1);
             panel1.Dock = DockStyle.Bottom;
             panel1.Font = new Font("Tahoma", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            panel1.Location = new Point(3, 714);
+            panel1.Location = new Point(3, 739);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1154, 40);
-            panel1.TabIndex = 0;
+            panel1.Size = new Size(1137, 46);
+            panel1.TabIndex = 2;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(399, 3);
+            label1.Location = new Point(938, 9);
             label1.Name = "label1";
             label1.Size = new Size(59, 19);
             label1.TabIndex = 4;
@@ -61,7 +62,6 @@
             // cyberProgressBar1
             // 
             cyberProgressBar1.Alpha = 50;
-            cyberProgressBar1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cyberProgressBar1.BackColor = Color.Transparent;
             cyberProgressBar1.Background = true;
             cyberProgressBar1.Background_WidthPen = 3F;
@@ -84,7 +84,7 @@
             cyberProgressBar1.LinearGradient_Background = false;
             cyberProgressBar1.LinearGradient_Value = false;
             cyberProgressBar1.LinearGradientPen = false;
-            cyberProgressBar1.Location = new Point(464, 3);
+            cyberProgressBar1.Location = new Point(0, 9);
             cyberProgressBar1.Maximum = 100;
             cyberProgressBar1.Minimum = 0;
             cyberProgressBar1.Name = "cyberProgressBar1";
@@ -105,29 +105,41 @@
             // pictureBox1
             // 
             pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
             pictureBox1.Location = new Point(3, 64);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(1154, 650);
+            pictureBox1.Size = new Size(1137, 721);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.TabIndex = 1;
+            pictureBox1.TabIndex = 3;
             pictureBox1.TabStop = false;
             // 
-            // Form25
+            // pictureBox2
+            // 
+            pictureBox2.Dock = DockStyle.Fill;
+            pictureBox2.Image = Properties.Resources.lance_chang_h3pVxOIpnzk_unsplash;
+            pictureBox2.Location = new Point(3, 64);
+            pictureBox2.Name = "pictureBox2";
+            pictureBox2.Size = new Size(1137, 675);
+            pictureBox2.SizeMode = PictureBoxSizeMode.CenterImage;
+            pictureBox2.TabIndex = 4;
+            pictureBox2.TabStop = false;
+            // 
+            // Form27
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1160, 757);
-            Controls.Add(pictureBox1);
+            ClientSize = new Size(1143, 788);
+            Controls.Add(pictureBox2);
             Controls.Add(panel1);
-            Name = "Form25";
+            Controls.Add(pictureBox1);
+            Name = "Form27";
             RightToLeft = RightToLeft.Yes;
-            Text = "Form25";
+            Text = "Form27";
             WindowState = FormWindowState.Maximized;
-            Load += Form25_Load;
+            Load += Form27_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -135,8 +147,9 @@
         #endregion
 
         private Panel panel1;
-        private PictureBox pictureBox1;
-        private ReaLTaiizor.Controls.CyberProgressBar cyberProgressBar1;
         private Label label1;
+        private ReaLTaiizor.Controls.CyberProgressBar cyberProgressBar1;
+        private PictureBox pictureBox1;
+        private PictureBox pictureBox2;
     }
 }

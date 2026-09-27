@@ -16,6 +16,8 @@ namespace StoreRoom.Forms
         {
             InitializeComponent();
             _warehouseService = warehouseService;
+            // اتصال رویداد Load به متد Form2_Load
+            this.Load += Form2_Load;
         }
 
         // سازنده برای ویرایش (دریافت شناسه انبار)
@@ -26,6 +28,12 @@ namespace StoreRoom.Forms
 
         private async void Form2_Load(object sender, EventArgs e)
         {
+            // تنظیم موقعیت فرم در مرکز صفحه
+            var screen = Screen.FromControl(this);
+            this.StartPosition = FormStartPosition.Manual;
+            this.Left = screen.WorkingArea.Left + (screen.WorkingArea.Width - this.Width) / 2;
+            this.Top = screen.WorkingArea.Top + (screen.WorkingArea.Height - this.Height) / 2;
+
             if (_warehouseId != 0)
             {
                 // حالت ویرایش: بارگذاری اطلاعات
@@ -167,5 +175,4 @@ namespace StoreRoom.Forms
             await SaveWarehouse();
         }
     }
-   
 }

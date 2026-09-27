@@ -23,6 +23,7 @@ namespace Application.Features.Implementation.Product_Service
             try
             {
                 return await _dbSet
+                    .Include(p=>p.Category)
                     .OrderByDescending(p => p.ProductId)
                     .Take(count)
                     .ToListAsync();

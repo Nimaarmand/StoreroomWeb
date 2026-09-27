@@ -20,6 +20,11 @@ namespace StoreRoom.Forms
 
         private void Form13_Load(object sender, EventArgs e)
         {
+            var screen = Screen.FromControl(this);
+            this.StartPosition = FormStartPosition.Manual;
+            this.Left = screen.WorkingArea.Left + (screen.WorkingArea.Width - this.Width) / 2;
+            this.Top = screen.WorkingArea.Top + (screen.WorkingArea.Height - this.Height) / 2;
+
             textBoxEdit1.UseSystemPasswordChar = true;
             textBoxEdit2.UseSystemPasswordChar = true;
             textBoxEdit3.KeyPress += TextBoxPhone_KeyPress;

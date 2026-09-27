@@ -21,9 +21,10 @@ namespace StoreRoom.Forms
             _supplierService = supplierService;
         }
         int _supplierId = 0;
-        private void Form9_Load(object sender, EventArgs e)
+        private async void Form9_Load(object sender, EventArgs e)
         {
             textBoxEdit1.Text = "جستجو ...";
+            await LoadSupplierAsync(showEmptyMessage: false);
         }
         private void DgvPersian()
         {
@@ -31,17 +32,14 @@ namespace StoreRoom.Forms
             if (poisonDataGridView1.Columns.Contains("SupplierId"))
                 poisonDataGridView1.Columns["SupplierId"].Visible = false;
 
-
             // تنظیم عنوان فارسی ستون‌ها
             poisonDataGridView1.Columns["Name"].HeaderText = "نام";
             poisonDataGridView1.Columns["Address"].HeaderText = "آدرس";
             poisonDataGridView1.Columns["Phone"].HeaderText = "تلفن";
             poisonDataGridView1.Columns["EconomicCode"].HeaderText = "کد اقتصادی";
 
-
             // تنظیم ترتیب نمایش ستون‌ها (اختیاری)
             //poisonDataGridView1.Columns["Name"].DisplayIndex = 0;
-
         }
         // ========== متد کمکی برای بارگذاری داده‌ها (قابل await) ==========
         private async Task LoadSupplierAsync(bool showEmptyMessage = false)
@@ -90,7 +88,6 @@ namespace StoreRoom.Forms
 
             try
             {
-
                 var products = await _supplierService.GetTopSuppliersAsync(count);
                 poisonDataGridView1.DataSource = products.ToList();
                 DgvPersian();
@@ -107,14 +104,12 @@ namespace StoreRoom.Forms
             }
         }
 
-
         private void poisonDataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && poisonDataGridView1.Rows[e.RowIndex].Cells["SupplierId"].Value != null)
             {
                 _supplierId = (int)poisonDataGridView1.Rows[e.RowIndex].Cells["SupplierId"].Value;
             }
-
         }
         //ویرایش 
         private async void toolStripMenuItem1_Click(object sender, EventArgs e)
@@ -132,14 +127,62 @@ namespace StoreRoom.Forms
             }
         }
 
+        // ✅ اصلاح رویداد جستجو (بدون تغییر نام رویداد)
         private async void textBoxEdit1_TextChanged(object sender, EventArgs e)
         {
-            string name = textBoxEdit1.Text.Trim();
+            string keyword = textBoxEdit1.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(name))
+            // اگر متن placeholder است، هیچ کاری نکن (از جستجو جلوگیری کن)
+            if (keyword == "جستجو ...")
+            {
+                return;
+            }
+
+            // اگر جستجو خالی شد، لیست کامل را نمایش بده
+            if (string.IsNullOrWhiteSpace(keyword))
             {
                 await LoadSupplierAsync(showEmptyMessage: false);
                 return;
+            }
+
+            try
+            {
+                var searchResults = await _supplierService.SearchAsync(keyword);
+                poisonDataGridView1.DataSource = searchResults.ToList();
+                DgvPersian();
+                CustomizeDataGridView();
+
+                if (!searchResults.Any())
+                    MessageBox.Show("هیچ تأمین‌کننده‌ای با عبارت مورد نظر یافت نشد.", "نتیجه جستجو",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطا در جستجو: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            if (_supplierId == 0)
+            {
+                MessageBox.Show("لطفاً ابتدا یک سطر را انتخاب کنید.", "اخطار", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (MessageBox.Show("آیا از حذف این تأمین‌کننده اطمینان دارید؟", "تأیید حذف",
+                                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                try
+                {
+                    await _supplierService.RemoveByIdAsync(_supplierId);
+                    MessageBox.Show("تأمین‌کننده با موفقیت حذف شد.", "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    await LoadSupplierAsync(showEmptyMessage: false);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"خطا در حذف تأمین‌کننده: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }

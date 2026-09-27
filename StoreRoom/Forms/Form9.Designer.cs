@@ -51,9 +51,10 @@
             // 
             flowLayoutPanel1.Controls.Add(foxButton1);
             flowLayoutPanel1.Controls.Add(dungeonNumeric1);
-            flowLayoutPanel1.Location = new Point(3, 628);
+            flowLayoutPanel1.Dock = DockStyle.Bottom;
+            flowLayoutPanel1.Location = new Point(3, 699);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(1136, 60);
+            flowLayoutPanel1.Size = new Size(1156, 60);
             flowLayoutPanel1.TabIndex = 0;
             // 
             // foxButton1
@@ -69,7 +70,7 @@
             foxButton1.EnabledCalc = true;
             foxButton1.Font = new Font("Tahoma", 12F, FontStyle.Bold);
             foxButton1.ForeColor = Color.Black;
-            foxButton1.Location = new Point(1010, 3);
+            foxButton1.Location = new Point(1030, 3);
             foxButton1.Name = "foxButton1";
             foxButton1.OverColor = Color.FromArgb(242, 242, 242);
             foxButton1.Size = new Size(123, 52);
@@ -88,7 +89,7 @@
             dungeonNumeric1.ButtonForeColorB = Color.FromArgb(75, 75, 75);
             dungeonNumeric1.Font = new Font("Tahoma", 12F, FontStyle.Bold);
             dungeonNumeric1.ForeColor = Color.Black;
-            dungeonNumeric1.Location = new Point(846, 3);
+            dungeonNumeric1.Location = new Point(866, 3);
             dungeonNumeric1.Maximum = 100L;
             dungeonNumeric1.Minimum = 0L;
             dungeonNumeric1.MinimumSize = new Size(93, 28);
@@ -103,9 +104,9 @@
             // 
             panel1.Controls.Add(poisonDataGridView1);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(3, 366);
+            panel1.Location = new Point(3, 343);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1136, 356);
+            panel1.Size = new Size(1156, 356);
             panel1.TabIndex = 1;
             // 
             // poisonDataGridView1
@@ -152,7 +153,7 @@
             poisonDataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             poisonDataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             poisonDataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            poisonDataGridView1.Size = new Size(1136, 356);
+            poisonDataGridView1.Size = new Size(1156, 356);
             poisonDataGridView1.TabIndex = 1;
             poisonDataGridView1.CellClick += poisonDataGridView1_CellClick;
             // 
@@ -176,6 +177,7 @@
             toolStripMenuItem2.Name = "toolStripMenuItem2";
             toolStripMenuItem2.Size = new Size(131, 24);
             toolStripMenuItem2.Text = "حذف";
+            toolStripMenuItem2.Click += toolStripMenuItem2_Click;
             // 
             // textBoxEdit1
             // 
@@ -190,7 +192,7 @@
             textBoxEdit1.Name = "textBoxEdit1";
             textBoxEdit1.ReadOnly = false;
             textBoxEdit1.RightToLeft = RightToLeft.Yes;
-            textBoxEdit1.Size = new Size(1136, 41);
+            textBoxEdit1.Size = new Size(1156, 41);
             textBoxEdit1.TabIndex = 5;
             textBoxEdit1.TextAlignment = HorizontalAlignment.Left;
             textBoxEdit1.UseSystemPasswordChar = false;
@@ -199,9 +201,9 @@
             // 
             // Form9
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1143, 726);
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            ClientSize = new Size(1163, 763);
             Controls.Add(textBoxEdit1);
             Controls.Add(panel1);
             Controls.Add(flowLayoutPanel1);

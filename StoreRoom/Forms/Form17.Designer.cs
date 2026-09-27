@@ -164,7 +164,7 @@
             poisonContextMenuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem1, toolStripMenuItem2, تعیندسترسیToolStripMenuItem });
             poisonContextMenuStrip1.Name = "poisonContextMenuStrip1";
             poisonContextMenuStrip1.RightToLeft = RightToLeft.Yes;
-            poisonContextMenuStrip1.Size = new Size(195, 98);
+            poisonContextMenuStrip1.Size = new Size(195, 76);
             // 
             // toolStripMenuItem1
             // 
@@ -206,8 +206,8 @@
             // 
             // Form17
             // 
-            AutoScaleDimensions = new SizeF(10F, 19F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1034, 719);
             Controls.Add(textBoxEdit1);
             Controls.Add(panel1);

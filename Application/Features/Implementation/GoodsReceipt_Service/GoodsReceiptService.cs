@@ -140,8 +140,6 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
         /// <summary>
         /// دریافت تعداد مشخصی از آخرین رسیدهای **تأیید شده** (وضعیت 1) به همراه جزئیات (DTO)
         /// </summary>
-        /// <param name="topCount">تعداد رکورد مورد نظر (پیش‌فرض ۲۰)</param>
-        /// <returns>لیستی از GoodsReceiptDto</returns>
         public async Task<List<GoodsReceiptDto>> GetTopApprovedReceiptsAsync(int topCount)
         {
             if (topCount <= 0) topCount = 20;
@@ -152,7 +150,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                     .Include(r => r.Product)
                     .Include(r => r.Supplier)
                     .Include(r => r.Warehouse)
-                    .Where(r => r.Status == 1)   // فقط تأیید شده‌ها
+                    .Where(r => r.Status == 1)
                     .OrderByDescending(r => r.ReceiptDate)
                     .Take(topCount)
                     .AsNoTracking()
@@ -161,7 +159,6 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                 if (receipts == null || !receipts.Any())
                     return new List<GoodsReceiptDto>();
 
-                // دریافت نام کاربران یکجا
                 var userIds = receipts.Where(r => !string.IsNullOrEmpty(r.UserId)).Select(r => r.UserId).Distinct().ToList();
                 Dictionary<string, string> userNames = new Dictionary<string, string>();
 
@@ -169,12 +166,11 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                 {
                     var users = await _userManager.Users
                         .Where(u => userIds.Contains(u.Id))
-                        .Select(u => new { u.Id, u.UserName })
+                        .Select(u => new { u.Id, u.FullName })
                         .ToListAsync();
-                    userNames = users.ToDictionary(u => u.Id, u => u.UserName);
+                    userNames = users.ToDictionary(u => u.Id, u => u.FullName);
                 }
 
-                // ساخت DTO
                 var result = new List<GoodsReceiptDto>();
                 foreach (var receipt in receipts)
                 {
@@ -188,7 +184,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         ProductName = receipt.Product?.Name ?? "نامشخص",
                         SupplierName = receipt.Supplier?.Name ?? "نامشخص",
                         WarehouseName = receipt.Warehouse?.Name ?? "نامشخص",
-                        UserName = userName,
+                        UserFullName = userName,
                         Quantity = receipt.Quantity,
                         Unit = receipt.Unit,
                         UnitPrice = receipt.UnitPrice,
@@ -196,9 +192,10 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         InvoiceNumber = receipt.InvoiceNumber,
                         InvoiceDate = receipt.InvoiceDate,
                         ReceiptDate = receipt.ReceiptDate,
-                        StatusText = "تأیید شده", // چون وضعیت 1
+                        StatusText = "تأیید شده",
                         BatchNumber = receipt.BatchNumber,
-                        Description = receipt.Description
+                        Description = receipt.Description,
+                        ApprovedByFullName = receipt.ApprovedByFullName ?? "نامشخص"   // ✅ اضافه شد
                     });
                 }
                 return result;
@@ -255,8 +252,13 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
         /// <summary>
         /// تأیید رسید ورودی، افزایش موجودی محصول و موجودی کل انبار، با اعتبارسنجی ظرفیت
         /// </summary>
-        public async Task<(bool Success, string Message)> ApproveReceiptAsync(int receiptId)
+        public async Task<(bool Success, string Message)> ApproveReceiptAsync(int receiptId, string currentUserId)
         {
+            // 1. اعتبارسنجی ورودی
+            if (string.IsNullOrEmpty(currentUserId))
+                return (false, "کاربر جاری شناسایی نشد. لطفاً وارد شوید.");
+
+            // 2. دریافت رسید همراه با محصول و انبار
             var receipt = await _dbSet
                 .Include(r => r.Product)
                 .Include(r => r.Warehouse)
@@ -268,32 +270,38 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
             if (receipt.Status == 1)
                 return (false, "این رسید قبلاً تأیید شده است.");
 
-            int currentWarehouseStock = receipt.Warehouse.Number;
-            int newWarehouseStock = currentWarehouseStock + (int)receipt.Quantity;
-            if (newWarehouseStock > receipt.Warehouse.Max)
-            {
-                return (false, $"ظرفیت انبار کافی نیست. حداکثر: {receipt.Warehouse.Max} - موجودی فعلی: {currentWarehouseStock}");
-            }
+            // 3. دریافت کاربر تأییدکننده
+            var user = await _userManager.FindByIdAsync(currentUserId);
+            if (user == null)
+                return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
 
-            // کست کردن _context به DbContext برای دسترسی به Database
+            // 4. شروع تراکنش
             var dbContext = (DbContext)_context;
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
-
             try
             {
+                // افزایش موجودی محصول و انبار
                 receipt.Product.Number += (int)receipt.Quantity;
-                receipt.Warehouse.Number = newWarehouseStock;
-                receipt.Status = 1;
+                receipt.Warehouse.Number += (int)receipt.Quantity;
 
-                await _context.SaveChangesAsync();
+                // تغییر وضعیت و ثبت اطلاعات تأییدکننده
+                receipt.Status = 1;
+                receipt.ApprovedByUserId = currentUserId;
+                receipt.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
+
+                dbContext.Entry(receipt).State = EntityState.Modified;
+                dbContext.Entry(receipt.Product).State = EntityState.Modified;
+                dbContext.Entry(receipt.Warehouse).State = EntityState.Modified;
+
+                await dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return (true, "رسید با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی گردید.");
+                return (true, "رسید با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return (false, $"خطا: {ex.Message}");
+                return (false, $"خطا در تأیید رسید: {ex.Message}");
             }
         }
 
@@ -364,9 +372,9 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
 
                 if (userIds.Any())
                 {
-                    // فرض بر این است که _userManager در دسترس است (از سازنده تزریق شده)
-                    var users = await _userManager.Users.Where(u => userIds.Contains(u.Id)).Select(u => new { u.Id, u.UserName }).ToListAsync();
-                    userNames = users.ToDictionary(u => u.Id, u => u.UserName);
+                   
+                    var users = await _userManager.Users.Where(u => userIds.Contains(u.Id)).Select(u => new { u.Id, u.FullName }).ToListAsync();
+                    userNames = users.ToDictionary(u => u.Id, u => u.FullName);
                 }
 
                 var result = new List<GoodsReceiptDto>();
@@ -382,7 +390,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         ProductName = receipt.Product?.Name ?? "نامشخص",
                         SupplierName = receipt.Supplier?.Name ?? "نامشخص",
                         WarehouseName = receipt.Warehouse?.Name ?? "نامشخص",
-                        UserName = userName,
+                        UserFullName = userName,
                         Quantity = receipt.Quantity,
                         Unit = receipt.Unit,
                         UnitPrice = receipt.UnitPrice,
@@ -392,7 +400,8 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         ReceiptDate = receipt.ReceiptDate,
                         StatusText = receipt.Status == 0 ? "در انتظار تأیید" : (receipt.Status == 1 ? "تأیید شده" : "لغو شده"),
                         BatchNumber = receipt.BatchNumber,
-                        Description = receipt.Description
+                        Description = receipt.Description,
+                        ApprovedByFullName= receipt.ApprovedByFullName,
                     });
                 }
                 return result;
@@ -421,32 +430,48 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
 
             keyword = keyword.Trim().ToLower();
 
-            await DbLock.Semaphore.WaitAsync();
             try
             {
                 var query = _dbSet
                     .Include(r => r.Product)
                     .Include(r => r.Supplier)
                     .Include(r => r.Warehouse)
-                    .Where(r => r.InvoiceNumber.ToLower().Contains(keyword) ||
-                                (r.Product != null && r.Product.Name.ToLower().Contains(keyword)) ||
-                                (r.Supplier != null && r.Supplier.Name.ToLower().Contains(keyword)))
+                    .Where(r => r.Status == 0 && // ✅ فقط رسیدهای در انتظار تأیید
+                                (r.InvoiceNumber.ToLower().Contains(keyword) ||
+                                 (r.Product != null && r.Product.Name.ToLower().Contains(keyword)) ||
+                                 (r.Supplier != null && r.Supplier.Name.ToLower().Contains(keyword))))
                     .OrderByDescending(r => r.ReceiptDate)
                     .Take(topCount)
                     .AsNoTracking();
 
                 var receipts = await query.ToListAsync();
                 var result = new List<GoodsReceiptDto>();
+
                 foreach (var receipt in receipts)
                 {
-                    var userName = await _usermanagementService.GetUserNameByIdAsync(receipt.UserId);
+                    // دریافت نام کاربر با مدیریت خطا
+                    string userName = "نامشخص";
+                    if (!string.IsNullOrEmpty(receipt.UserId))
+                    {
+                        try
+                        {
+                            userName = await _usermanagementService.GetUserNameByIdAsync(receipt.UserId);
+                            if (string.IsNullOrEmpty(userName))
+                                userName = "نامشخص";
+                        }
+                        catch
+                        {
+                            userName = "نامشخص";
+                        }
+                    }
+
                     result.Add(new GoodsReceiptDto
                     {
                         ReceiptId = receipt.ReceiptId,
                         ProductName = receipt.Product?.Name ?? "نامشخص",
                         SupplierName = receipt.Supplier?.Name ?? "نامشخص",
                         WarehouseName = receipt.Warehouse?.Name ?? "نامشخص",
-                        UserName = userName,
+                        UserFullName = userName,
                         Quantity = receipt.Quantity,
                         Unit = receipt.Unit,
                         UnitPrice = receipt.UnitPrice,
@@ -459,15 +484,86 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         Description = receipt.Description
                     });
                 }
+
                 return result;
             }
-            finally
+            catch (Exception ex)
             {
-                DbLock.Semaphore.Release();
+                // لاگ خطا در صورت نیاز
+                return new List<GoodsReceiptDto>();
             }
         }
-       
-        
-     
+
+        public async Task<List<GoodsReceiptDto>> SearchReceipts(string keyword, int topCount = 50)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return await GetTopReceiptsWithDetailsAsync(topCount);
+
+            keyword = keyword.Trim().ToLower();
+
+            try
+            {
+                var query = _dbSet
+                    .Include(r => r.Product)
+                    .Include(r => r.Supplier)
+                    .Include(r => r.Warehouse)
+                    .Where(r => r.Status == 1 && // ✅ فقط رسید های تایید شده
+                                (r.InvoiceNumber.ToLower().Contains(keyword) ||
+                                 (r.Product != null && r.Product.Name.ToLower().Contains(keyword)) ||
+                                 (r.Supplier != null && r.Supplier.Name.ToLower().Contains(keyword))))
+                    .OrderByDescending(r => r.ReceiptDate)
+                    .Take(topCount)
+                    .AsNoTracking();
+
+                var receipts = await query.ToListAsync();
+                var result = new List<GoodsReceiptDto>();
+
+                foreach (var receipt in receipts)
+                {
+                    // دریافت نام کاربر با مدیریت خطا
+                    string userName = "نامشخص";
+                    if (!string.IsNullOrEmpty(receipt.UserId))
+                    {
+                        try
+                        {
+                            userName = await _usermanagementService.GetUserNameByIdAsync(receipt.UserId);
+                            if (string.IsNullOrEmpty(userName))
+                                userName = "نامشخص";
+                        }
+                        catch
+                        {
+                            userName = "نامشخص";
+                        }
+                    }
+
+                    result.Add(new GoodsReceiptDto
+                    {
+                        ReceiptId = receipt.ReceiptId,
+                        ProductName = receipt.Product?.Name ?? "نامشخص",
+                        SupplierName = receipt.Supplier?.Name ?? "نامشخص",
+                        WarehouseName = receipt.Warehouse?.Name ?? "نامشخص",
+                        UserFullName = userName,
+                        Quantity = receipt.Quantity,
+                        Unit = receipt.Unit,
+                        UnitPrice = receipt.UnitPrice,
+                        TotalPrice = receipt.Quantity * receipt.UnitPrice,
+                        InvoiceNumber = receipt.InvoiceNumber,
+                        InvoiceDate = receipt.InvoiceDate,
+                        ReceiptDate = receipt.ReceiptDate,
+                        StatusText = receipt.Status == 0 ? "در انتظار تأیید" : (receipt.Status == 1 ? "تأیید شده" : "لغو شده"),
+                        BatchNumber = receipt.BatchNumber,
+                        Description = receipt.Description
+                    });
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // لاگ خطا در صورت نیاز
+                return new List<GoodsReceiptDto>();
+            }
+        }
+
     }
 }

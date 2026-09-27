@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Application.Dto
@@ -32,7 +33,17 @@ namespace Application.Dto
         /// <summary>
         /// نام کاربر ثبت‌کننده (جایگزین UserId)
         /// </summary>
-        public string UserName { get; set; }
+        public string UserFullName { get; set; }
+        /// <summary>
+        /// شناسه کاربر تأییدکننده رسید
+        /// </summary>
+        public string? ApprovedByUserId { get; set; }
+
+        /// <summary>
+        /// نام کامل کاربر تأییدکننده
+        /// </summary>
+        [MaxLength(100)]
+        public string? ApprovedByFullName { get; set; }
 
         /// <summary>
         /// بارکد اسکن شده (در صورت وجود)
@@ -42,7 +53,7 @@ namespace Application.Dto
         /// <summary>
         /// تعداد ورودی
         /// </summary>
-        public decimal Quantity { get; set; }
+        public int Quantity { get; set; }
 
         /// <summary>
         /// واحد اندازه‌گیری (عدد، کیلوگرم، متر و ...)

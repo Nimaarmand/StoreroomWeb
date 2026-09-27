@@ -2,6 +2,7 @@
 using Application.Features.Implementation.Supplier_Service;
 using Application.Features.Implementation.Warehouse_Service;
 using Domain.Entity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using ReaLTaiizor.Forms;
 using System;
@@ -15,8 +16,9 @@ namespace StoreRoom.Forms
         private readonly GoodsReceiptService _goodsReceiptService;
         private readonly WarehouseService _warehouseService;
         private readonly SupplierService _supplierService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private Guid _productId;
-        private int _receiptId = 0;   // برای ویرایش
+        private int _receiptId = 0;
 
         // ========== سازنده‌ها ==========
 
@@ -25,6 +27,7 @@ namespace StoreRoom.Forms
             : this(goodsReceiptService,
                    Program.ServiceProvider.GetRequiredService<WarehouseService>(),
                    Program.ServiceProvider.GetRequiredService<SupplierService>(),
+                   Program.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(),
                    Guid.Empty)
         {
             _receiptId = receiptId;
@@ -35,6 +38,7 @@ namespace StoreRoom.Forms
             : this(goodsReceiptService,
                    Program.ServiceProvider.GetRequiredService<WarehouseService>(),
                    Program.ServiceProvider.GetRequiredService<SupplierService>(),
+                   Program.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(),
                    productId)
         {
         }
@@ -44,12 +48,14 @@ namespace StoreRoom.Forms
             GoodsReceiptService goodsReceiptService,
             WarehouseService warehouseService,
             SupplierService supplierService,
+            UserManager<ApplicationUser> userManager,
             Guid productId)
         {
             InitializeComponent();
             _goodsReceiptService = goodsReceiptService;
             _warehouseService = warehouseService;
             _supplierService = supplierService;
+            _userManager = userManager;
             _productId = productId;
             this.Load += Form12_Load;
         }
@@ -91,9 +97,9 @@ namespace StoreRoom.Forms
                 return;
             }
 
-            if (!decimal.TryParse(textBoxEdit1.Text.Trim(), out decimal quantity) || quantity <= 0)
+            if (!int.TryParse(textBoxEdit1.Text.Trim(), out int quantity) || quantity <= 0)
             {
-                MessageBox.Show("تعداد (Quantity) باید یک عدد معتبر و بزرگتر از صفر باشد.", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("تعداد (Quantity) باید یک عدد صحیح و بزرگتر از صفر باشد.", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -147,6 +153,14 @@ namespace StoreRoom.Forms
             {
                 if (_receiptId == 0)   // درج جدید
                 {
+                    string userFullName = "نامشخص";
+                    if (!string.IsNullOrEmpty(Program.CurrentUserId))
+                    {
+                        var user = await _userManager.FindByIdAsync(Program.CurrentUserId);
+                        if (user != null)
+                            userFullName = user.FullName ?? user.UserName ?? "نامشخص";
+                    }
+
                     var receipt = new GoodsReceipt
                     {
                         ProductId = _productId,
@@ -165,7 +179,8 @@ namespace StoreRoom.Forms
                         ReceiptDate = DateTime.Today,
                         CreatedAt = DateTime.Now,
                         Status = 0,
-                        UserId = Program.CurrentUserId
+                        UserId = Program.CurrentUserId,
+                        UserFullName = userFullName
                     };
                     await _goodsReceiptService.AddAsync(receipt);
                     MessageBox.Show("رسید انبار با موفقیت ثبت شد.", "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -190,17 +205,15 @@ namespace StoreRoom.Forms
                     existing.BatchNumber = batchNumber;
                     existing.Description = description;
                     existing.ScannedBarcode = scannedBarcode;
-                    // موجودیت‌های دیگر (مانند TaxRate, ReceiptDate, CreatedAt, Status, UserId) معمولاً نباید تغییر کنند
+
                     await _goodsReceiptService.UpdateAsync(existing);
                     MessageBox.Show("رسید انبار با موفقیت ویرایش شد.", "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 Clear();
                 textBoxEdit1.Focus();
-                // در صورت تمایل، فرم بسته نشود (برای ویرایش پیاپی) ولی معمولاً بسته می‌شود
-                // اینجا فقط فیلدها پاک می‌شوند؛ برای بستن می‌توانید this.DialogResult = DialogResult.OK قرار دهید
+
                 if (_receiptId == 0)
-                    this.DialogResult = DialogResult.OK;  // برای درج جدید، فرم بسته شود
-                // برای ویرایش، فرم بسته نمی‌شود تا کاربر بتواند ویرایش دیگری انجام دهد (یا می‌توانید ببندید)
+                    this.DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {

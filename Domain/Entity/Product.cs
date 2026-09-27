@@ -24,10 +24,10 @@ namespace Domain.Entity
         public string BaseUnit { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal? MinStockLevel { get; set; }
+        public int? MinStockLevel { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal? MaxStockLevel { get; set; }
+        public int? MaxStockLevel { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Weight { get; set; }

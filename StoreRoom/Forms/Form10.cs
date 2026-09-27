@@ -107,7 +107,7 @@ namespace StoreRoom.Forms
                 CustomizeDataGridView();
 
                 if (!customer.Any())
-                    MessageBox.Show("هیچ محصولی یافت نشد.", "اطلاع",
+                    MessageBox.Show("هیچ مشتری یافت نشد.", "اطلاع",
                                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -167,12 +167,35 @@ namespace StoreRoom.Forms
 
         private async void textBoxEdit1_TextChanged(object sender, EventArgs e)
         {
-            string name = textBoxEdit1.Text.Trim();
+            string keyword = textBoxEdit1.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(name))
+            // اگر متن placeholder است، هیچ کاری نکن (از جستجو جلوگیری کن)
+            if (keyword == "جستجو ...")
+            {
+                return;
+            }
+
+            // اگر جستجو خالی شد، لیست کامل را نمایش بده
+            if (string.IsNullOrWhiteSpace(keyword))
             {
                 await LoadCustomerAsync(showEmptyMessage: false);
                 return;
+            }
+
+            try
+            {
+                var searchResults = await _customerService.SearchByNameAsync(keyword);
+                poisonDataGridView1.DataSource = searchResults.ToList();
+                DgvPersian();
+                CustomizeDataGridView();
+
+                if (!searchResults.Any())
+                    MessageBox.Show("هیچ مشتری‌کننده‌ای با عبارت مورد نظر یافت نشد.", "نتیجه جستجو",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطا در جستجو: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

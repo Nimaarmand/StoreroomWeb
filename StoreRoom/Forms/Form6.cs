@@ -132,5 +132,13 @@ namespace StoreRoom.Forms
                 MessageBox.Show($"خطا در ذخیره‌سازی: {ex.Message}", "خطا", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void Form6_Load_1(object sender, EventArgs e)
+        {
+            var screen = Screen.FromControl(this);
+            this.StartPosition = FormStartPosition.Manual;
+            this.Left = screen.WorkingArea.Left + (screen.WorkingArea.Width - this.Width) / 2;
+            this.Top = screen.WorkingArea.Top + (screen.WorkingArea.Height - this.Height) / 2;
+        }
     }
 }

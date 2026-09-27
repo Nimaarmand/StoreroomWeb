@@ -194,12 +194,13 @@ namespace StoreRoom.Forms
             try
             {
                 var results = await _goodsIssueService.SearchIssuesAsync(keyword, (int)dungeonNumeric1.Value);
-                poisonDataGridView1.DataSource = results?.ToList() ?? new System.Collections.Generic.List<GoodsIssueDto>();
+                poisonDataGridView1.DataSource = results?.ToList() ?? new List<GoodsIssueDto>();
                 DgvPersian();
                 CustomizeDataGridView();
 
-                if (results == null || !results.Any())
-                    MessageBox.Show("هیچ حواله خروجی با عبارت مورد نظر یافت نشد.", "نتیجه جستجو", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!results.Any())
+                    MessageBox.Show("هیچ حواله خروجی با عبارت مورد نظر یافت نشد.", "نتیجه جستجو",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {

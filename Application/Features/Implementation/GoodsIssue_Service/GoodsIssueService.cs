@@ -210,65 +210,140 @@ namespace Application.Features.Implementation.GoodsIssue_Service
             if (string.IsNullOrEmpty(currentUserId))
                 return (false, "کاربر جاری شناسایی نشد. لطفاً وارد شوید.");
 
-            var issue = await _dbSet
-                .Include(i => i.Product)
-                .Include(i => i.Warehouse)
-                .FirstOrDefaultAsync(i => i.IssueId == issueId);
-
-            if (issue == null)
-                return (false, "حواله یافت نشد.");
-
-            if (issue.Status == 1)
-                return (false, "این حواله قبلاً تأیید شده است.");
-
-            if (issue.Product.Number < issue.Quantity)
-                return (false, $"موجودی محصول '{issue.Product.Name}' کافی نیست.");
-
-            // دریافت کاربر تأییدکننده
-            ApplicationUser user = null;
-            if (_userManager != null)
-                user = await _userManager.FindByIdAsync(currentUserId);
-
-            if (user == null && _usermanagementService != null)
-            {
-                var userEntity = await _usermanagementService.FindUserByIdAsync(currentUserId);
-                if (userEntity != null)
-                {
-                    // اگر FullName در دسترس است
-                    var fullName = userEntity.GetType().GetProperty("FullName")?.GetValue(userEntity)?.ToString();
-                    user = new ApplicationUser { Id = currentUserId, FullName = fullName ?? "نامشخص" };
-                }
-            }
-
-            if (user == null)
-                return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
-
+            // دریافت DbContext واقعی (فرض می‌کنیم _context همان DbContext است)
             var dbContext = (DbContext)_context;
-            await using var transaction = await dbContext.Database.BeginTransactionAsync();
-            try
+
+            // ایجاد استراتژی اجرایی
+            var strategy = dbContext.Database.CreateExecutionStrategy();
+
+            // اجرای کل عملیات به‌صورت یک واحد قابل تکرار
+            return await strategy.ExecuteAsync(async () =>
             {
-                issue.Product.Number -= (int)issue.Quantity;
-                issue.Warehouse.Number -= (int)issue.Quantity;
-                issue.Status = 1;
-                issue.IssueDate = DateTime.Today;
-                issue.ApprovedByUserId = currentUserId;
-                issue.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
+                // همه چیز داخل این بلاک اجرا می‌شود و در صورت بروز خطای موقت، دوباره اجرا می‌گردد
+                var issue = await _dbSet
+                    .Include(i => i.Product)
+                    .Include(i => i.Warehouse)
+                    .FirstOrDefaultAsync(i => i.IssueId == issueId);
 
-                dbContext.Entry(issue).State = EntityState.Modified;
-                dbContext.Entry(issue.Product).State = EntityState.Modified;
-                dbContext.Entry(issue.Warehouse).State = EntityState.Modified;
+                if (issue == null)
+                    return (false, "حواله یافت نشد.");
 
-                await dbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                if (issue.Status == 1)
+                    return (false, "این حواله قبلاً تأیید شده است.");
 
-                return (true, "حواله با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                return (false, $"خطا در تأیید حواله: {ex.Message}");
-            }
+                if (issue.Product.Number < issue.Quantity)
+                    return (false, $"موجودی محصول '{issue.Product.Name}' کافی نیست.");
+
+                // دریافت کاربر تأییدکننده
+                ApplicationUser user = null;
+                if (_userManager != null)
+                    user = await _userManager.FindByIdAsync(currentUserId);
+
+                if (user == null && _usermanagementService != null)
+                {
+                    var userEntity = await _usermanagementService.FindUserByIdAsync(currentUserId);
+                    if (userEntity != null)
+                    {
+                        var fullName = userEntity.GetType().GetProperty("FullName")?.GetValue(userEntity)?.ToString();
+                        user = new ApplicationUser { Id = currentUserId, FullName = fullName ?? "نامشخص" };
+                    }
+                }
+
+                if (user == null)
+                    return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
+
+                // شروع تراکنش درون بلاک استراتژی
+                await using var transaction = await dbContext.Database.BeginTransactionAsync();
+
+                try
+                {
+                    issue.Product.Number -= (int)issue.Quantity;
+                    issue.Warehouse.Number -= (int)issue.Quantity;
+                    issue.Status = 1;
+                    issue.IssueDate = DateTime.Today;
+                    issue.ApprovedByUserId = currentUserId;
+                    issue.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
+
+                    dbContext.Entry(issue).State = EntityState.Modified;
+                    dbContext.Entry(issue.Product).State = EntityState.Modified;
+                    dbContext.Entry(issue.Warehouse).State = EntityState.Modified;
+
+                    await dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return (true, "حواله با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw; // اجازه دهید استراتژی خطا را مدیریت کند یا به لایه بالاتر برود
+                }
+            });
         }
+        //public async Task<(bool Success, string Message)> ApproveIssueAsync(int issueId, string currentUserId)
+        //{
+        //    if (string.IsNullOrEmpty(currentUserId))
+        //        return (false, "کاربر جاری شناسایی نشد. لطفاً وارد شوید.");
+
+        //    var issue = await _dbSet
+        //        .Include(i => i.Product)
+        //        .Include(i => i.Warehouse)
+        //        .FirstOrDefaultAsync(i => i.IssueId == issueId);
+
+        //    if (issue == null)
+        //        return (false, "حواله یافت نشد.");
+
+        //    if (issue.Status == 1)
+        //        return (false, "این حواله قبلاً تأیید شده است.");
+
+        //    if (issue.Product.Number < issue.Quantity)
+        //        return (false, $"موجودی محصول '{issue.Product.Name}' کافی نیست.");
+
+        //    // دریافت کاربر تأییدکننده
+        //    ApplicationUser user = null;
+        //    if (_userManager != null)
+        //        user = await _userManager.FindByIdAsync(currentUserId);
+
+        //    if (user == null && _usermanagementService != null)
+        //    {
+        //        var userEntity = await _usermanagementService.FindUserByIdAsync(currentUserId);
+        //        if (userEntity != null)
+        //        {
+        //            // اگر FullName در دسترس است
+        //            var fullName = userEntity.GetType().GetProperty("FullName")?.GetValue(userEntity)?.ToString();
+        //            user = new ApplicationUser { Id = currentUserId, FullName = fullName ?? "نامشخص" };
+        //        }
+        //    }
+
+        //    if (user == null)
+        //        return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
+
+        //    var dbContext = (DbContext)_context;
+        //    await using var transaction = await dbContext.Database.BeginTransactionAsync();
+        //    try
+        //    {
+        //        issue.Product.Number -= (int)issue.Quantity;
+        //        issue.Warehouse.Number -= (int)issue.Quantity;
+        //        issue.Status = 1;
+        //        issue.IssueDate = DateTime.Today;
+        //        issue.ApprovedByUserId = currentUserId;
+        //        issue.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
+
+        //        dbContext.Entry(issue).State = EntityState.Modified;
+        //        dbContext.Entry(issue.Product).State = EntityState.Modified;
+        //        dbContext.Entry(issue.Warehouse).State = EntityState.Modified;
+
+        //        await dbContext.SaveChangesAsync();
+        //        await transaction.CommitAsync();
+
+        //        return (true, "حواله با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        await transaction.RollbackAsync();
+        //        return (false, $"خطا در تأیید حواله: {ex.Message}");
+        //    }
+        //}
 
         /// <summary>
         /// لغو حواله (تغییر وضعیت به 2)
@@ -439,7 +514,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                 return await GetTopIssuesWithDetailsAsync(topCount);
 
             keyword = keyword.Trim().ToLower();
-            await DbLock.Semaphore.WaitAsync();
+          
             try
             {
                 var query = _dbSet
@@ -449,6 +524,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                     .Where(i => i.InvoiceNumber.ToLower().Contains(keyword) ||
                                 (i.Product != null && i.Product.Name.ToLower().Contains(keyword)) ||
                                 (i.Customer != null && i.Customer.Name.ToLower().Contains(keyword)))
+                    .Where(i=>i.Status==0)
                     .OrderByDescending(i => i.IssueDate)
                     .Take(topCount)
                     .AsNoTracking();
@@ -488,10 +564,68 @@ namespace Application.Features.Implementation.GoodsIssue_Service
             }
             finally
             {
-                DbLock.Semaphore.Release();
+               
             }
         }
+        public async Task<List<GoodsIssueDto>> SearchIssues(string keyword, int topCount = 50)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return await GetTopIssuesWithDetailsAsync(topCount);
 
+            keyword = keyword.Trim().ToLower();
+
+            try
+            {
+                var query = _dbSet
+                    .Include(i => i.Product)
+                    .Include(i => i.Warehouse)
+                    .Include(i => i.Customer)
+                    .Where(i => i.InvoiceNumber.ToLower().Contains(keyword) ||
+                                (i.Product != null && i.Product.Name.ToLower().Contains(keyword)) ||
+                                (i.Customer != null && i.Customer.Name.ToLower().Contains(keyword)))
+                    .Where(i => i.Status == 1)
+                    .OrderByDescending(i => i.IssueDate)
+                    .Take(topCount)
+                    .AsNoTracking();
+
+                var issues = await query.ToListAsync();
+                var result = new List<GoodsIssueDto>();
+                foreach (var issue in issues)
+                {
+                    string userName = "نامشخص";
+                    if (_usermanagementService != null && !string.IsNullOrEmpty(issue.UserId))
+                        userName = await _usermanagementService.GetUserNameByIdAsync(issue.UserId);
+                    else if (!string.IsNullOrEmpty(issue.UserFullName))
+                        userName = issue.UserFullName;
+
+                    result.Add(new GoodsIssueDto
+                    {
+                        IssueId = issue.IssueId,
+                        ProductName = issue.Product?.Name ?? "نامشخص",
+                        WarehouseName = issue.Warehouse?.Name ?? "نامشخص",
+                        CustomerName = issue.Customer?.Name ?? (issue.Type == IssueType.Sale ? "مشتری حذف شده" : "-"),
+                        UserName = userName,
+                        Quantity = issue.Quantity,
+                        Unit = issue.Unit,
+                        UnitSellingPrice = issue.UnitSellingPrice,
+                        InvoiceNumber = issue.InvoiceNumber,
+                        InvoiceDate = issue.InvoiceDate ?? DateTime.MinValue,
+                        CreatedAt = issue.CreatedAt,
+                        IssueDate = issue.IssueDate ?? DateTime.MinValue,
+                        StatusText = issue.Status == 0 ? "در انتظار تأیید" : (issue.Status == 1 ? "تأیید شده" : "لغو شده"),
+                        BatchNumber = issue.BatchNumber,
+                        Description = issue.Description,
+                        TypeText = issue.Type.ToString(),
+                        ApprovedByUserName = issue.ApprovedByFullName ?? "نامشخص"
+                    });
+                }
+                return result;
+            }
+            finally
+            {
+
+            }
+        }
         /// <summary>
         /// جستجوی حواله‌های در انتظار تأیید بر اساس کلمه کلیدی
         /// </summary>
