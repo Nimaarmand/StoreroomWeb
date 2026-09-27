@@ -1,6 +1,7 @@
 using Application.Features.Definition.Context;
 using Application.Features.Definition.GenericRepository;
 using Application.Features.Implementation.Category_Service;
+using Application.Features.Implementation.Common;
 using Application.Features.Implementation.Customer_Service;
 using Application.Features.Implementation.GenericRepository_Service;
 using Application.Features.Implementation.GoodsIssue_Service;
@@ -184,6 +185,7 @@ namespace StoreRoom
                 try
                 {
                     services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+                    services.AddScoped<IDbLock, DbLock>();
                     services.AddScoped<WarehouseService>();
                     services.AddScoped<SupplierService>();
                     services.AddScoped<GoodsReceiptService>();
@@ -242,7 +244,12 @@ namespace StoreRoom
                 Logger.Log("🔄 ساخت ServiceProvider...");
                 try
                 {
-                    ServiceProvider = services.BuildServiceProvider();
+                    // ValidateOnBuild تمام سرویس‌های ثبت‌شده را در استارتاپ بررسی می‌کند تا
+                    // وابستگی ثبت‌نشده (مثل IDbLock) به‌جای کرش هنگام اجرا، همین‌جا گزارش شود.
+                    ServiceProvider = services.BuildServiceProvider(new ServiceProviderOptions
+                    {
+                        ValidateOnBuild = true
+                    });
                     Logger.Log("✅ ServiceProvider با موفقیت ساخته شد");
                 }
                 catch (Exception ex)

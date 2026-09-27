@@ -34,10 +34,5 @@ namespace Persistans.Context
         public DbSet<GoodsReceipt> GoodsReceipts { get; set; }
         public DbSet<GoodsIssue> GoodsIssues { get; set; }
         public DbSet<Category> Categories { get; set; }
-
-        // پیاده‌سازی اینترفیس IApplicationDbContext
-        public new DbSet<T> Set<T>() where T : class => base.Set<T>();
-        public new async Task<int> SaveChangesAsync() => await base.SaveChangesAsync();
-        public new int SaveChanges() => base.SaveChanges();
     }
 }

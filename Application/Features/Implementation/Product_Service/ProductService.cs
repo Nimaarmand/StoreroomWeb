@@ -1,5 +1,4 @@
-﻿using Application.Features.Definition.Context;
-using Application.Features.Implementation.Common;
+using Application.Features.Definition.Context;
 using Application.Features.Implementation.GenericRepository_Service;
 using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +12,7 @@ namespace Application.Features.Implementation.Product_Service
 {
     public class ProductService : GenericRepository<Product>
     {
-        public ProductService(IApplicationDbContext context) : base(context)
+        public ProductService(IApplicationDbContext context, IDbLock dbLock) : base(context, dbLock)
         {
         }
 

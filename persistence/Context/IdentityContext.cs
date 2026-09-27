@@ -24,8 +24,4 @@ public class IdentityContext : IdentityDbContext<ApplicationUser,Role,string>, I
             optionsBuilder.UseSqlServer("Server=.;Database=StoreroomDB;Trusted_Connection=True;TrustServerCertificate=True;");
         }
     }
-
-    public new DbSet<T> Set<T>() where T : class => base.Set<T>();
-    public new async Task<int> SaveChangesAsync() => await base.SaveChangesAsync();
-    public new int SaveChanges() => base.SaveChanges();
 }

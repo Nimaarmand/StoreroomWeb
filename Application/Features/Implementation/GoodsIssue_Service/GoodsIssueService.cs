@@ -1,6 +1,5 @@
-﻿using Application.Dto;
+using Application.Dto;
 using Application.Features.Definition.Context;
-using Application.Features.Implementation.Common;
 using Application.Features.Implementation.GenericRepository_Service;
 using Application.Features.Implementation.Usermanagement_Service;
 using Domain.Entity;
@@ -18,26 +17,19 @@ namespace Application.Features.Implementation.GoodsIssue_Service
         private readonly UsermanagementService _usermanagementService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        // ========== سازنده‌ها ==========
+        // ========== سازنده ==========
 
-        public GoodsIssueService(IApplicationDbContext context) : base(context)
-        {
-        }
-
-        public GoodsIssueService(IApplicationDbContext context, UsermanagementService usermanagementService)
-            : this(context)
-        {
-            _usermanagementService = usermanagementService;
-        }
-
-        public GoodsIssueService(IApplicationDbContext context, UserManager<ApplicationUser> userManager)
-            : this(context)
-        {
-            _userManager = userManager;
-        }
-
-        public GoodsIssueService(IApplicationDbContext context, UsermanagementService usermanagementService, UserManager<ApplicationUser> userManager)
-            : this(context)
+        /// <summary>
+        /// پیش‌تر چهار سازنده وجود داشت تا در صورت ناقص بودن گراف DI قابل ساخت باشد.
+        /// این کار باعث می‌شد وابستگی‌ها null شوند و کد با null-checkهای پراکنده کار کند.
+        /// اکنون یک سازنده واحد وجود دارد و همه وابستگی‌ها اجباری هستند.
+        /// </summary>
+        public GoodsIssueService(
+            IApplicationDbContext context,
+            IDbLock dbLock,
+            UsermanagementService usermanagementService,
+            UserManager<ApplicationUser> userManager)
+            : base(context, dbLock)
         {
             _usermanagementService = usermanagementService;
             _userManager = userManager;
@@ -210,11 +202,8 @@ namespace Application.Features.Implementation.GoodsIssue_Service
             if (string.IsNullOrEmpty(currentUserId))
                 return (false, "کاربر جاری شناسایی نشد. لطفاً وارد شوید.");
 
-            // دریافت DbContext واقعی (فرض می‌کنیم _context همان DbContext است)
-            var dbContext = (DbContext)_context;
-
             // ایجاد استراتژی اجرایی
-            var strategy = dbContext.Database.CreateExecutionStrategy();
+            var strategy = _context.Database.CreateExecutionStrategy();
 
             // اجرای کل عملیات به‌صورت یک واحد قابل تکرار
             return await strategy.ExecuteAsync(async () =>
@@ -231,29 +220,24 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                 if (issue.Status == 1)
                     return (false, "این حواله قبلاً تأیید شده است.");
 
+                if (issue.Product == null)
+                    return (false, "کالای این حواله در دیتابیس یافت نشد.");
+
+                if (issue.Warehouse == null)
+                    return (false, "انبار این حواله انتخاب نشده است.");
+
                 if (issue.Product.Number < issue.Quantity)
                     return (false, $"موجودی محصول '{issue.Product.Name}' کافی نیست.");
 
                 // دریافت کاربر تأییدکننده
-                ApplicationUser user = null;
-                if (_userManager != null)
-                    user = await _userManager.FindByIdAsync(currentUserId);
-
-                if (user == null && _usermanagementService != null)
-                {
-                    var userEntity = await _usermanagementService.FindUserByIdAsync(currentUserId);
-                    if (userEntity != null)
-                    {
-                        var fullName = userEntity.GetType().GetProperty("FullName")?.GetValue(userEntity)?.ToString();
-                        user = new ApplicationUser { Id = currentUserId, FullName = fullName ?? "نامشخص" };
-                    }
-                }
+                var user = await _userManager.FindByIdAsync(currentUserId)
+                           ?? await _usermanagementService.FindUserByIdAsync(currentUserId);
 
                 if (user == null)
                     return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
 
                 // شروع تراکنش درون بلاک استراتژی
-                await using var transaction = await dbContext.Database.BeginTransactionAsync();
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
                 try
                 {
@@ -264,11 +248,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                     issue.ApprovedByUserId = currentUserId;
                     issue.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
 
-                    dbContext.Entry(issue).State = EntityState.Modified;
-                    dbContext.Entry(issue.Product).State = EntityState.Modified;
-                    dbContext.Entry(issue.Warehouse).State = EntityState.Modified;
-
-                    await dbContext.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
                     return (true, "حواله با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");

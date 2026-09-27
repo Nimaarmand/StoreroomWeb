@@ -1,5 +1,4 @@
-﻿using Application.Features.Definition.Context;
-using Application.Features.Implementation.Common;
+using Application.Features.Definition.Context;
 using Application.Features.Implementation.GenericRepository_Service;
 using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +11,7 @@ namespace Application.Features.Implementation.Category_Service
 {
     public class CategoryService : GenericRepository<Category>
     {
-        public CategoryService(IApplicationDbContext context) : base(context)
+        public CategoryService(IApplicationDbContext context, IDbLock dbLock) : base(context, dbLock)
         {
         }
 

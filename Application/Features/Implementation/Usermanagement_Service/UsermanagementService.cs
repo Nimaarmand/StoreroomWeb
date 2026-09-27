@@ -1,6 +1,6 @@
-﻿using Application.Constants.User_error_handling;
+using Application.Constants.User_error_handling;
 using Application.Features.Definition.Usermanagement_Service;
-using Application.Features.Implementation.Common;
+using Application.Features.Definition.Context;
 using Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +16,21 @@ namespace Application.Features.Implementation.Usermanagement_Service
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
 
+        /// <summary>
+        /// قفل محدود به scope جاری. چون به صورت Scoped ثبت می‌شود، همزمانی روی
+        /// UserManager/RoleManager در یک درخواست سریال می‌شود ولی درخواست‌های موازی
+        /// روی هم قفل نمی‌شوند.
+        /// </summary>
+        private readonly IDbLock DbLock;
+
         public UsermanagementService(
             UserManager<ApplicationUser> userManager,
-            RoleManager<Role> roleManager)
+            RoleManager<Role> roleManager,
+            IDbLock dbLock)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            DbLock = dbLock ?? throw new ArgumentNullException(nameof(dbLock));
         }
 
         public async Task<string> GetUserNameByIdAsync(string userId)

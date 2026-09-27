@@ -1,6 +1,5 @@
-﻿using Application.Features.Definition.Context;
+using Application.Features.Definition.Context;
 using Application.Features.Definition.GenericRepository;
-using Application.Features.Implementation.Common;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,9 +14,16 @@ namespace Application.Features.Implementation.GenericRepository_Service
         protected readonly IApplicationDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        public GenericRepository(IApplicationDbContext context)
+        /// <summary>
+        /// قفل محدود به scope جاری. چون به صورت Scoped ثبت می‌شود، هر درخواست وب
+        /// قفل مستقل خود را دارد و ترافیک موازی روی هم قفل نمی‌شود.
+        /// </summary>
+        protected IDbLock DbLock { get; }
+
+        public GenericRepository(IApplicationDbContext context, IDbLock dbLock)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            DbLock = dbLock ?? throw new ArgumentNullException(nameof(dbLock));
             _dbSet = _context.Set<T>();
         }
 

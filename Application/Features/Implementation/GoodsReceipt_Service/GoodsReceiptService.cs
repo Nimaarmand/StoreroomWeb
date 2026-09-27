@@ -1,6 +1,5 @@
-﻿using Application.Dto;
+using Application.Dto;
 using Application.Features.Definition.Context;
-using Application.Features.Implementation.Common;
 using Application.Features.Implementation.GenericRepository_Service;
 using Application.Features.Implementation.Usermanagement_Service;
 using Domain.Entity;
@@ -19,10 +18,11 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
         private readonly UserManager<ApplicationUser> _userManager;
 
         public GoodsReceiptService(IApplicationDbContext context,
+            IDbLock dbLock,
             UsermanagementService usermanagementService,
             UserManager<ApplicationUser> userManager
             )
-            : base(context)
+            : base(context, dbLock)
         {
             _usermanagementService = usermanagementService;
             _userManager = userManager;
@@ -276,8 +276,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                 return (false, "کاربر تأییدکننده در دیتابیس یافت نشد.");
 
             // 4. شروع تراکنش
-            var dbContext = (DbContext)_context;
-            await using var transaction = await dbContext.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // افزایش موجودی محصول و انبار
@@ -289,11 +288,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                 receipt.ApprovedByUserId = currentUserId;
                 receipt.ApprovedByFullName = user.FullName ?? user.UserName ?? "نامشخص";
 
-                dbContext.Entry(receipt).State = EntityState.Modified;
-                dbContext.Entry(receipt.Product).State = EntityState.Modified;
-                dbContext.Entry(receipt.Warehouse).State = EntityState.Modified;
-
-                await dbContext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return (true, "رسید با موفقیت تأیید شد و موجودی‌ها به‌روزرسانی شدند.");
