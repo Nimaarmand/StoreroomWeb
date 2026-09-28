@@ -98,6 +98,8 @@ else
                                         @(p.IsActive ? "غیرفعال" : "فعال")
                                     </button>
                                 </form>
+                                @await Html.PartialAsync("_DeleteButton", new Web.Models.DeleteButtonModel(
+                                    p.ProductId, $"کالای «{p.Name}» حذف شود؟"))
                             </div>
                         </td>
                     </tr>

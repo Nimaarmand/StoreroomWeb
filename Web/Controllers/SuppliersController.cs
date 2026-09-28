@@ -30,8 +30,10 @@ public class SuppliersController : Controller
         return View(list.OrderBy(s => s.Name).ToList());
     }
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public IActionResult Create() => View("Form", new SupplierFormModel());
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public async Task<IActionResult> Edit(int id)
     {
         var supplier = await _suppliers.GetByIdAsync(id);
@@ -48,6 +50,7 @@ public class SuppliersController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(SupplierFormModel model)
     {
@@ -69,6 +72,7 @@ public class SuppliersController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, SupplierFormModel model)
     {

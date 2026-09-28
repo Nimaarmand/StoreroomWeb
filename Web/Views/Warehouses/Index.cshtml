@@ -73,6 +73,8 @@ else
                         </td>
                         <td class="text-center">
                             <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@w.WarehouseId">ویرایش</a>
+                            @await Html.PartialAsync("_DeleteButton", new Web.Models.DeleteButtonModel(
+                                w.WarehouseId, $"انبار «{w.Name}» حذف شود؟"))
                         </td>
                     </tr>
                 }

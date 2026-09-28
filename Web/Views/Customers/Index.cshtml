@@ -53,6 +53,8 @@ else
                         <td class="text-center small">@PersianDate.ToPersianDate(c.Creationdate)</td>
                         <td class="text-center">
                             <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@c.CustomerId">ویرایش</a>
+                            @await Html.PartialAsync("_DeleteButton", new Web.Models.DeleteButtonModel(
+                                c.CustomerId, $"مشتری «{c.Name}» حذف شود؟"))
                         </td>
                     </tr>
                 }

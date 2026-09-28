@@ -51,6 +51,8 @@ else
                         <td class="small text-secondary">@(string.IsNullOrWhiteSpace(s.Address) ? "-" : s.Address)</td>
                         <td class="text-center">
                             <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@s.SupplierId">ویرایش</a>
+                            @await Html.PartialAsync("_DeleteButton", new Web.Models.DeleteButtonModel(
+                                s.SupplierId, $"تأمین‌کننده «{s.Name}» حذف شود؟"))
                         </td>
                     </tr>
                 }

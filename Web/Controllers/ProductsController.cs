@@ -44,12 +44,14 @@ public class ProductsController : Controller
         return View(list.OrderBy(p => p.Name).ToList());
     }
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public async Task<IActionResult> Create()
     {
         await FillCategoryListAsync();
         return View("Form", new ProductFormModel());
     }
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public async Task<IActionResult> Edit(Guid id)
     {
         var product = await _products.GetProductByIdAsync(id);
@@ -75,6 +77,7 @@ public class ProductsController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProductFormModel model)
     {
@@ -103,6 +106,7 @@ public class ProductsController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, ProductFormModel model)
     {

@@ -24,8 +24,10 @@ public class WarehousesController : Controller
         return View(list.OrderBy(w => w.Name).ToList());
     }
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public IActionResult Create() => View("Form", new WarehouseFormModel());
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public async Task<IActionResult> Edit(int id)
     {
         var warehouse = await _warehouses.GetByIdAsync(id);
@@ -43,6 +45,7 @@ public class WarehousesController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(WarehouseFormModel model)
     {
@@ -68,6 +71,7 @@ public class WarehousesController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, WarehouseFormModel model)
     {

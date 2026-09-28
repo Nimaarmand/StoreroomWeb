@@ -87,6 +87,8 @@ public class GoodsReceiptsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ReceiptFormModel model)
     {
+        RequireSupplier(model);
+
         if (!ModelState.IsValid)
         {
             await FillFormLookupsAsync();
@@ -214,11 +216,7 @@ public class GoodsReceiptsController : Controller
 
         model.ReceiptId = id;
 
-        // تأمین‌کننده در هر رسیدی لازم است. این بررسی قبل از ModelState.IsValid
-        // انجام می‌شود تا پیام کنار خود فیلد بنشیند؛ اعتبارسنج سرویس این خطا را
-        // با کلید خالی برمی‌گرداند و فقط در خلاصه‌ی بالای فرم دیده می‌شد.
-        if (model.SupplierId is null or <= 0)
-            ModelState.AddModelError(nameof(model.SupplierId), "تأمین‌کننده را انتخاب کنید.");
+        RequireSupplier(model);
 
         if (!ModelState.IsValid)
         {
@@ -350,6 +348,17 @@ public class GoodsReceiptsController : Controller
 
         var product = await _products.GetProductByIdAsync(productId.Value);
         return product is { IsActive: true } ? product : null;
+    }
+
+    /// <summary>
+    /// هر رسیدی به یک تأمین‌کننده نیاز دارد. این بررسی جدا از اعتبارسنج سرویس
+    /// انجام می‌شود تا پیام کنار خود فیلد بنشیند؛ سرویس این خطا را با کلید خالی
+    /// برمی‌گرداند و نتیجه‌اش فقط دیده‌شدن در خلاصه‌ی بالای فرم بود.
+    /// </summary>
+    private void RequireSupplier(ReceiptFormModel model)
+    {
+        if (model.SupplierId is null or <= 0)
+            ModelState.AddModelError(nameof(model.SupplierId), "تأمین‌کننده را انتخاب کنید.");
     }
 
     private async Task FillFormLookupsAsync()

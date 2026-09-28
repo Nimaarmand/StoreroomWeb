@@ -69,6 +69,8 @@ else
                                 <form method="post" asp-action="ToggleActive" asp-route-id="@c.CategoryId" class="d-inline">
                                     <button class="btn btn-outline-secondary" type="submit">@(c.IsActive ? "غیرفعال" : "فعال")</button>
                                 </form>
+                                @await Html.PartialAsync("_DeleteButton", new Web.Models.DeleteButtonModel(
+                                    c.CategoryId, $"دسته‌بندی «{c.Name}» حذف شود؟"))
                             </div>
                         </td>
                     </tr>

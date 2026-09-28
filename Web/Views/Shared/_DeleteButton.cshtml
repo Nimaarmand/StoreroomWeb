@@ -1,0 +1,17 @@
+@model Web.Models.DeleteButtonModel
+
+@{
+    // حذف فقط برای مدیر سامانه نمایش داده می‌شود. کنترلرها با سیاست
+    // AdminOnly محافظت شده‌اند، پس این صرفاً لایه‌ی نمایش است.
+    var isAdmin = User.IsInRole("Admin");
+}
+
+@if (isAdmin)
+{
+    <form method="post" asp-action="Delete" asp-route-id="@Model.Id" class="d-inline"
+          onsubmit="return confirm('@Model.ConfirmText');">
+        <button class="btn btn-outline-danger" type="submit" title="@Model.ConfirmText">
+            حذف
+        </button>
+    </form>
+}

@@ -24,8 +24,10 @@ public class CustomersController : Controller
         return View(list.OrderBy(c => c.Name).ToList());
     }
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public IActionResult Create() => View("Form", new CustomerFormModel());
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public async Task<IActionResult> Edit(int id)
     {
         var customer = await _customers.GetByIdAsync(id);
@@ -42,6 +44,7 @@ public class CustomersController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CustomerFormModel model)
     {
@@ -60,6 +63,7 @@ public class CustomersController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, CustomerFormModel model)
     {

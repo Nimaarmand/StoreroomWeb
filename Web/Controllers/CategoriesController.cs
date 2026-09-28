@@ -28,12 +28,14 @@ public class CategoriesController : Controller
         return View(list.OrderBy(c => c.Name).ToList());
     }
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public async Task<IActionResult> Create()
     {
         await FillParentListAsync();
         return View("Form", new CategoryFormModel());
     }
 
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     public async Task<IActionResult> Edit(int id)
     {
         var category = await _categories.GetCategoryByIdAsync(id);
@@ -51,6 +53,7 @@ public class CategoriesController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CategoryFormModel model)
     {
@@ -75,6 +78,7 @@ public class CategoriesController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.CanEditMasterData)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, CategoryFormModel model)
     {

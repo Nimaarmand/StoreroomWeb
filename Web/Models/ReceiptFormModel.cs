@@ -36,8 +36,10 @@ public class ReceiptFormModel
     [Display(Name = "انبار مقصد")]
     public int? WarehouseId { get; set; }
 
+    // [Required] عمداً ندارد: با Required خطا با کلید خالی می‌رفت و فقط در
+    // خلاصه‌ی بالای فرم دیده می‌شد. اعتبار سنجی در کنترلر انجام می‌شود تا پیام
+    // کنار خود فیلد تأمین‌کننده بنشیند.
     [Display(Name = "تأمین‌کننده")]
-    [Required(ErrorMessage = "تأمین‌کننده را انتخاب کنید")]
     public int? SupplierId { get; set; }
 
     [Display(Name = "شماره فاکتور")]
