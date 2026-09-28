@@ -1,0 +1,302 @@
+@model ReceiptFormModel
+@{
+    var isEdit = Model.ReceiptId > 0;
+    ViewData["Title"] = isEdit ? "ویرایش رسید انبار" : "ثبت رسید انبار";
+
+    var products = (List<ProductLookupItem>)(ViewBag.Products ?? new List<ProductLookupItem>());
+    var warehouses = (List<LookupItem>)(ViewBag.Warehouses ?? new List<LookupItem>());
+    var suppliers = (List<LookupItem>)(ViewBag.Suppliers ?? new List<LookupItem>());
+    var units = products.Select(p => p.BaseUnit).Where(u => !string.IsNullOrWhiteSpace(u)).Distinct().OrderBy(u => u).ToList();
+}
+
+<div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">بازگشت به فهرست</a>
+</div>
+
+<div asp-validation-summary="All" class="alert alert-danger"></div>
+
+<form method="post" asp-action="@(isEdit ? "Edit" : "Create")" id="receiptForm">
+    @if (isEdit)
+    {
+        <input type="hidden" name="id" value="@Model.ReceiptId" />
+    }
+    <input type="hidden" asp-for="ReceiptId" />
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-box-arrow-in-down"></i> اطلاعات رسید
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @* کالا در ویرایش قابل تغییر نیست: رسید به یک کالای مشخص تعلق دارد. *@
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="ProductId" />
+                            <div class="col-12">
+                                <label class="form-label">کالا</label>
+                                <input class="form-control" disabled
+                                       value="@products.FirstOrDefault(p => p.Value == Model.ProductId)?.Text" />
+                                <div class="form-text">کالای رسید پس از ثبت قابل تغییر نیست.</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <label class="form-label" asp-for="ProductId"></label>
+                                <select class="form-select" asp-for="ProductId" id="ProductId">
+                                    <option value="">— انتخاب کنید —</option>
+                                    @foreach (var p in products)
+                                    {
+                                        var stock = p.Stock.HasValue
+                                            ? PersianDate.Digits(p.Stock.Value.ToString())
+                                            : "—";
+                                        <option value="@p.Value"
+                                                data-unit="@p.BaseUnit"
+                                                data-stock="@(p.Stock?.ToString() ?? "")">
+                                            @p.Text (@stock @p.BaseUnit)
+                                        </option>
+                                    }
+                                </select>
+                                <span class="text-danger small" asp-validation-for="ProductId"></span>
+                            </div>
+                        }
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">بارکدخوان</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="barcodeInput"
+                                       autocomplete="off" placeholder="بارکد را اسکن یا تایپ و Enter بزنید" />
+                                <button type="button" class="btn btn-outline-primary" id="barcodeBtn">خواندن</button>
+                            </div>
+                            <div class="form-text" id="barcodeHint">
+                                اسکنر مثل صفحه‌کلید تایپ می‌کند؛ کافی است فوکوس روی این کادر باشد.
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" asp-for="Quantity"></label>
+                            <input class="form-control" asp-for="Quantity" id="Quantity" />
+                            <span class="text-danger small" asp-validation-for="Quantity"></span>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" asp-for="Unit"></label>
+                            <input class="form-control" asp-for="Unit" list="unitList" id="Unit" />
+                            <datalist id="unitList">
+                                @foreach (var u in units)
+                                {
+                                    <option value="@u"></option>
+                                }
+                            </datalist>
+                            <span class="text-danger small" asp-validation-for="Unit"></span>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" asp-for="UnitPrice"></label>
+                            <input class="form-control" asp-for="UnitPrice" id="UnitPrice" />
+                            <span class="text-danger small" asp-validation-for="UnitPrice"></span>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" asp-for="TaxRate"></label>
+                            <input class="form-control" asp-for="TaxRate" id="TaxRate" />
+                            <span class="text-danger small" asp-validation-for="TaxRate"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" asp-for="SupplierId"></label>
+                            <select class="form-select" asp-for="SupplierId">
+                                <option value="">— انتخاب کنید —</option>
+                                @foreach (var s in suppliers)
+                                {
+                                    <option value="@s.Value">@s.Text</option>
+                                }
+                            </select>
+                            <span class="text-danger small" asp-validation-for="SupplierId"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" asp-for="WarehouseId"></label>
+                            <select class="form-select" asp-for="WarehouseId">
+                                <option value="">— بدون انبار —</option>
+                                @foreach (var w in warehouses)
+                                {
+                                    <option value="@w.Value">@w.Text</option>
+                                }
+                            </select>
+                            <span class="text-danger small" asp-validation-for="WarehouseId"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" asp-for="InvoiceNumber"></label>
+                            <input class="form-control" asp-for="InvoiceNumber" />
+                            <span class="text-danger small" asp-validation-for="InvoiceNumber"></span>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" asp-for="InvoiceDate"></label>
+                            <input class="form-control" type="date" asp-for="InvoiceDate" />
+                            <span class="text-danger small" asp-validation-for="InvoiceDate"></span>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" asp-for="ShelfLocation"></label>
+                            <input class="form-control" asp-for="ShelfLocation" />
+                            <span class="text-danger small" asp-validation-for="ShelfLocation"></span>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" asp-for="BatchNumber"></label>
+                            <input class="form-control" asp-for="BatchNumber" />
+                            <span class="text-danger small" asp-validation-for="BatchNumber"></span>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" asp-for="ScannedBarcode"></label>
+                            <input class="form-control" asp-for="ScannedBarcode" id="ScannedBarcode" />
+                            <span class="text-danger small" asp-validation-for="ScannedBarcode"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" asp-for="Description"></label>
+                            <textarea class="form-control" rows="2" asp-for="Description"></textarea>
+                            <span class="text-danger small" asp-validation-for="Description"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">
+                        @(isEdit ? "ذخیره تغییرات" : "ثبت رسید")
+                    </button>
+                    <a class="btn btn-outline-secondary" asp-action="Index">انصراف</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">خلاصه مبلغ</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-7">مبلغ کل</dt>
+                        <dd class="col-5 text-end num" id="totalPrice">۰</dd>
+
+                        <dt class="col-7">مالیات</dt>
+                        <dd class="col-5 text-end num" id="taxAmount">۰</dd>
+
+                        <dt class="col-7">مبلغ نهایی</dt>
+                        <dd class="col-5 text-end num fw-bold" id="netPrice">۰</dd>
+                    </dl>
+                    <hr />
+                    <div class="form-text">
+                        محاسبه پیش‌نمایش است. مبلغ قطعی همان چیزی است که در فهرست رسیدها ذخیره می‌شود.
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i>
+                ثبت رسید موجودی را تغییر نمی‌دهد. موجودی تنها زمانی تغییر می‌کند که
+                سرپرست رسید را تأیید کند.
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const form = document.getElementById('receiptForm');
+            const qty = document.getElementById('Quantity');
+            const price = document.getElementById('UnitPrice');
+            const tax = document.getElementById('TaxRate');
+            const unit = document.getElementById('Unit');
+            const product = document.getElementById('ProductId');
+            const scanned = document.getElementById('ScannedBarcode');
+            const barcodeInput = document.getElementById('barcodeInput');
+            const barcodeBtn = document.getElementById('barcodeBtn');
+            const barcodeHint = document.getElementById('barcodeHint');
+            const totalOut = document.getElementById('totalPrice');
+            const taxOut = document.getElementById('taxAmount');
+            const netOut = document.getElementById('netPrice');
+
+            // جدا کننده هزارگان فارسی/عربی علاوه بر کاما، چون کاربر ممکن است
+            // عدد را با ویرگول تایپ کند و مرورگر آن را صفر بشناسد.
+            function num(el) {
+                if (!el) return 0;
+                const raw = (el.value || '').replace(/[,،\u066c\s]/g, '').replace(/[۰-۹]/g,
+                    d => String(d.charCodeAt(0) - 0x06F0));
+                const n = parseFloat(raw);
+                return isNaN(n) ? 0 : n;
+            }
+
+            function toPersian(value) {
+                return value.toLocaleString('fa-IR', { maximumFractionDigits: 2 });
+            }
+
+            function recalc() {
+                const total = num(qty) * num(price);
+                const rate = num(tax);
+                const taxAmount = total * rate / 100;
+                totalOut.textContent = toPersian(total);
+                taxOut.textContent = toPersian(taxAmount);
+                netOut.textContent = toPersian(total + taxAmount);
+            }
+
+            // با انتخاب دستی کالا، واحد پایه همان کالا به‌طور خودکار پر می‌شود.
+            if (product) {
+                product.addEventListener('change', function () {
+                    const opt = product.options[product.selectedIndex];
+                    if (opt && opt.dataset.unit) unit.value = opt.dataset.unit;
+                });
+            }
+
+            function lookupBarcode() {
+                const code = (barcodeInput.value || '').trim();
+                if (!code) return;
+                barcodeHint.textContent = 'در حال جستجو…';
+
+                fetch('/GoodsReceipts/BarcodeLookup?barcode=' + encodeURIComponent(code))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.found) {
+                            if (product) product.value = data.productId;
+                            if (unit) unit.value = data.baseUnit || unit.value;
+                            if (scanned) scanned.value = code;
+                            barcodeInput.value = '';
+                            barcodeHint.textContent = data.message;
+                            if (qty) { qty.focus(); qty.select(); }
+                            recalc();
+                        } else {
+                            barcodeHint.textContent = data.message;
+                        }
+                    })
+                    .catch(() => {
+                        barcodeHint.textContent = 'جستجوی بارکد ناموفق بود.';
+                    });
+            }
+
+            if (barcodeBtn) barcodeBtn.addEventListener('click', lookupBarcode);
+            if (barcodeInput) {
+                barcodeInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        lookupBarcode();
+                    }
+                });
+            }
+
+            [qty, price, tax].forEach(el => {
+                if (el) {
+                    el.addEventListener('input', recalc);
+                    el.addEventListener('blur', recalc);
+                }
+            });
+
+            recalc();
+        })();
+    </script>
+}

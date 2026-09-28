@@ -107,7 +107,10 @@ builder.Services.AddLocalization();
 // ============================================================
 // MVC + فارسی و تاریخ شمسی
 // ============================================================
-builder.Services.AddControllersWithViews();
+// Culture جاری fa-IR است و تقویم آن شمسی؛ برای همین بایند پیش‌فرض
+// تاریخ ISO-8601 فرم‌ها را اشتباه می‌خواند. بایند تاریخ میلادی جایگزین می‌شود.
+builder.Services.AddControllersWithViews(options =>
+    options.ModelBinderProviders.Insert(0, new GregorianDateModelBinderProvider()));
 
 const string persianCulture = "fa-IR";
 builder.Services.Configure<RequestLocalizationOptions>(options =>

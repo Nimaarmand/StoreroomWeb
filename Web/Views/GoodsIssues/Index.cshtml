@@ -24,7 +24,12 @@
 <div class="card">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <span class="fw-semibold"><i class="bi bi-box-arrow-up-left"></i> فهرست حواله‌ها</span>
-        <span class="badge text-bg-secondary num">@PersianDate.Digits(Model.Count.ToString())</span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge text-bg-secondary num">@PersianDate.Digits(Model.Count.ToString())</span>
+            <a class="btn btn-sm btn-primary" asp-action="Create">
+                <i class="bi bi-plus-lg"></i> ثبت حواله جدید
+            </a>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-hover table-striped mb-0 align-middle">
@@ -72,13 +77,21 @@
                                 @(i.CreatedAt.HasValue ? PersianDate.ToPersianDate(i.CreatedAt.Value) : "—")
                             </td>
                             <td class="text-center">
-                                <span class="badge @(string.IsNullOrWhiteSpace(i.StatusText) ? "bg-secondary" : "")">
-                                    @(string.IsNullOrWhiteSpace(i.StatusText) ? "—" : i.StatusText)
+                                @{
+                                    var badge = StatusBadge.Of(i.Status);
+                                }
+                                <span class="badge @badge.CssClass">
+                                    @(string.IsNullOrWhiteSpace(i.StatusText) ? badge.Text : i.StatusText)
                                 </span>
                             </td>
                             <td class="text-center text-nowrap">
                                 <a class="btn btn-sm btn-outline-primary"
                                    asp-action="Details" asp-route-id="@i.IssueId">جزئیات</a>
+                                @if (i.Status == 0)
+                                {
+                                    <a class="btn btn-sm btn-outline-secondary"
+                                       asp-action="Edit" asp-route-id="@i.IssueId">ویرایش</a>
+                                }
                                 @if (canApprove)
                                 {
                                     <form asp-action="Approve" asp-route-id="@i.IssueId" method="post" class="d-inline">

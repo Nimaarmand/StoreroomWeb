@@ -24,7 +24,12 @@
 <div class="card">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <span class="fw-semibold"><i class="bi bi-truck"></i> فهرست رسیدها</span>
-        <span class="badge text-bg-secondary num">@PersianDate.Digits(Model.Count.ToString())</span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge text-bg-secondary num">@PersianDate.Digits(Model.Count.ToString())</span>
+            <a class="btn btn-sm btn-primary" asp-action="Create">
+                <i class="bi bi-plus-lg"></i> ثبت رسید جدید
+            </a>
+        </div>
     </div>
     <div class="table-responsive">
         <table class="table table-hover table-striped mb-0 align-middle">
@@ -68,13 +73,21 @@
                             <td class="text-center num fw-semibold">@PersianDate.Digits(r.NetPrice.ToString("N0"))</td>
                             <td class="num">@PersianDate.ToPersianDate(r.ReceiptDate)</td>
                             <td class="text-center">
-                                <span class="badge @Web.Models.StatusBadge.Css(0)">
-                                    @(string.IsNullOrWhiteSpace(r.StatusText) ? Web.Models.StatusBadge.Text(0) : r.StatusText)
-                                </span>
+                                @{
+                                    var badge = StatusBadge.Of(r.Status);
+                                }
+                                <span class="badge @badge.CssClass">@badge.Text</span>
                             </td>
                             <td class="text-center text-nowrap">
                                 <a class="btn btn-sm btn-outline-primary"
                                    asp-action="Details" asp-route-id="@r.ReceiptId">جزئیات</a>
+                                @* فقط سند در انتظار تأیید قابل ویرایش است؛ ویرایش
+                                   رسید تأییدشده موجودی را با سند ناهماهنگ می‌کند. *@
+                                @if (r.Status == 0)
+                                {
+                                    <a class="btn btn-sm btn-outline-secondary"
+                                       asp-action="Edit" asp-route-id="@r.ReceiptId">ویرایش</a>
+                                }
                                 @if (canApprove)
                                 {
                                     <form asp-action="Approve" asp-route-id="@r.ReceiptId" method="post"

@@ -195,6 +195,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         InvoiceDate = receipt.InvoiceDate,
                         ReceiptDate = receipt.ReceiptDate,
                         StatusText = "تأیید شده",
+                        Status = receipt.Status,
                         BatchNumber = receipt.BatchNumber,
                         Description = receipt.Description,
                         ApprovedByFullName = receipt.ApprovedByFullName ?? "نامشخص"   // ✅ اضافه شد
@@ -352,7 +353,9 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
         }
 
         /// <summary>
-        /// به‌روزرسانی یک رسید (با قفل)
+        /// به‌روزرسانی یک رسید.
+        /// قفل را <c>GenericRepository.UpdateAsync</c> می‌گیرد؛ گرفتن دوباره‌ی
+        /// آن روی SemaphoreSlim(1) باعث بن‌بست می‌شد.
         /// </summary>
         /// <param name="entity">شیء GoodsReceipt با مقادیر جدید</param>
         /// <returns>شیء به‌روز شده</returns>
@@ -360,15 +363,8 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-            //await DbLock.Semaphore.WaitAsync();
-            try
-            {
-                return await base.UpdateAsync(entity);
-            }
-            finally
-            {
-                //DbLock.Semaphore.Release();
-            }
+
+            return await base.UpdateAsync(entity);
         }
 
         // ========== متدهای DTO (نیاز به قفل دارند چون به دیتابیس دسترسی دارند) ==========
@@ -431,6 +427,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         InvoiceDate = receipt.InvoiceDate,
                         ReceiptDate = receipt.ReceiptDate,
                         StatusText = receipt.Status == 0 ? "در انتظار تأیید" : (receipt.Status == 1 ? "تأیید شده" : "لغو شده"),
+                        Status = receipt.Status,
                         BatchNumber = receipt.BatchNumber,
                         Description = receipt.Description,
                         ApprovedByFullName= receipt.ApprovedByFullName,
@@ -468,10 +465,10 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                     .Include(r => r.Product)
                     .Include(r => r.Supplier)
                     .Include(r => r.Warehouse)
-                    .Where(r => r.Status == 0 && // ✅ فقط رسیدهای در انتظار تأیید
-                                (r.InvoiceNumber.ToLower().Contains(keyword) ||
-                                 (r.Product != null && r.Product.Name.ToLower().Contains(keyword)) ||
-                                 (r.Supplier != null && r.Supplier.Name.ToLower().Contains(keyword))))
+                    .Where(r => // همه وضعیت‌ها: رسید تأییدشده هم باید با شماره فاکتور پیدا شود
+                                (r.InvoiceNumber != null && r.InvoiceNumber.ToLower().Contains(keyword)) ||
+                                (r.Product != null && r.Product.Name.ToLower().Contains(keyword)) ||
+                                (r.Supplier != null && r.Supplier.Name.ToLower().Contains(keyword)))
                     .OrderByDescending(r => r.ReceiptDate)
                     .Take(topCount)
                     .AsNoTracking();
@@ -512,6 +509,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         InvoiceDate = receipt.InvoiceDate,
                         ReceiptDate = receipt.ReceiptDate,
                         StatusText = receipt.Status == 0 ? "در انتظار تأیید" : (receipt.Status == 1 ? "تأیید شده" : "لغو شده"),
+                        Status = receipt.Status,
                         BatchNumber = receipt.BatchNumber,
                         Description = receipt.Description
                     });
@@ -583,6 +581,7 @@ namespace Application.Features.Implementation.GoodsReceipt_Service
                         InvoiceDate = receipt.InvoiceDate,
                         ReceiptDate = receipt.ReceiptDate,
                         StatusText = receipt.Status == 0 ? "در انتظار تأیید" : (receipt.Status == 1 ? "تأیید شده" : "لغو شده"),
+                        Status = receipt.Status,
                         BatchNumber = receipt.BatchNumber,
                         Description = receipt.Description
                     });

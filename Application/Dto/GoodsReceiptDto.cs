@@ -111,6 +111,13 @@ namespace Application.Dto
         public string StatusText { get; set; }
 
         /// <summary>
+        /// کد عددی وضعیت: 0 = در انتظار تأیید، 1 = تأیید شده، 2 = لغو شده.
+        /// بدون این فیلد، نمای صفحه ناچار بود وضعیت را ثابت 0 فرض کند و
+        /// رسید تأییدشده هم «در انتظار تأیید» نشان داده می‌شد.
+        /// </summary>
+        public byte Status { get; set; }
+
+        /// <summary>
         /// تاریخ انقضای کالا (در صورت وجود)
         /// </summary>
         public DateTime? ExpiryDate { get; set; }

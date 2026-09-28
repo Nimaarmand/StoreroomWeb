@@ -368,20 +368,15 @@ namespace Application.Features.Implementation.GoodsIssue_Service
         }
 
         /// <summary>
-        /// به‌روزرسانی حواله (با قفل)
+        /// به‌روزرسانی حواله.
+        /// قفل عمداً اینجا گرفته نمی‌شود: <c>GenericRepository.UpdateAsync</c> خودش
+        /// همان قفل را می‌گیرد و گرفتن دوباره‌ی آن روی SemaphoreSlim(1) باعث
+        /// بن‌بست می‌شد (درخواست هرگز تمام نمی‌شد).
         /// </summary>
         public override async Task<GoodsIssue> UpdateAsync(GoodsIssue entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            await DbLock.Semaphore.WaitAsync();
-            try
-            {
-                return await base.UpdateAsync(entity);
-            }
-            finally
-            {
-                DbLock.Semaphore.Release();
-            }
+            return await base.UpdateAsync(entity);
         }
 
         // ========== متدهای DTO ==========
@@ -417,6 +412,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                 CreatedAt = i.CreatedAt,
                 IssueDate = i.IssueDate ?? DateTime.MinValue,
                 StatusText = "تأیید شده",
+                Status = i.Status,
                 BatchNumber = i.BatchNumber,
                 Description = i.Description,
                 TypeText = i.Type.ToString()
@@ -453,6 +449,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                     CreatedAt = i.CreatedAt,
                     InvoiceNumber = i.InvoiceNumber,
                     StatusText = "در انتظار تأیید",
+                Status = i.Status,
                     UserName = i.UserFullName ?? "نامشخص",
                     BatchNumber = i.BatchNumber,
                     Description = i.Description
@@ -504,6 +501,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                         CreatedAt = issue.CreatedAt,
                         IssueDate = issue.IssueDate ?? DateTime.MinValue,
                         StatusText = issue.Status == 0 ? "در انتظار تأیید" : (issue.Status == 1 ? "تأیید شده" : "لغو شده"),
+                    Status = issue.Status,
                         BatchNumber = issue.BatchNumber,
                         Description = issue.Description,
                         TypeText = issue.Type.ToString(),
@@ -564,6 +562,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                         CreatedAt = issue.CreatedAt,
                         IssueDate = issue.IssueDate ?? DateTime.MinValue,
                         StatusText = issue.Status == 0 ? "در انتظار تأیید" : (issue.Status == 1 ? "تأیید شده" : "لغو شده"),
+                    Status = issue.Status,
                         BatchNumber = issue.BatchNumber,
                         Description = issue.Description,
                         TypeText = issue.Type.ToString(),
@@ -623,6 +622,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                         CreatedAt = issue.CreatedAt,
                         IssueDate = issue.IssueDate ?? DateTime.MinValue,
                         StatusText = issue.Status == 0 ? "در انتظار تأیید" : (issue.Status == 1 ? "تأیید شده" : "لغو شده"),
+                    Status = issue.Status,
                         BatchNumber = issue.BatchNumber,
                         Description = issue.Description,
                         TypeText = issue.Type.ToString(),
@@ -653,10 +653,10 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                     .Include(i => i.Product)
                     .Include(i => i.Customer)
                     .Include(i => i.Warehouse)
-                    .Where(i => i.Status == 0 && (
+                    .Where(i => // همه وضعیت‌ها: حواله تأییدشده هم باید با شماره فاکتور پیدا شود
                         (i.InvoiceNumber != null && i.InvoiceNumber.ToLower().Contains(keyword)) ||
                         (i.Product != null && i.Product.Name.ToLower().Contains(keyword)) ||
-                        (i.Customer != null && i.Customer.Name.ToLower().Contains(keyword))))
+                        (i.Customer != null && i.Customer.Name.ToLower().Contains(keyword)))
                     .OrderByDescending(i => i.IssueDate)
                     .Take(topCount)
                     .AsNoTracking()
@@ -673,6 +673,7 @@ namespace Application.Features.Implementation.GoodsIssue_Service
                         CreatedAt = i.CreatedAt,
                         InvoiceNumber = i.InvoiceNumber,
                         StatusText = "در انتظار تأیید",
+                Status = i.Status,
                         UserName = i.UserFullName ?? "نامشخص",
                         BatchNumber = i.BatchNumber,
                         Description = i.Description

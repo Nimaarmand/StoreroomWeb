@@ -1,0 +1,296 @@
+@model IssueFormModel
+@{
+    var isEdit = Model.IssueId > 0;
+    ViewData["Title"] = isEdit ? "ویرایش حواله خروج" : "ثبت حواله خروج";
+
+    var products = (List<ProductLookupItem>)(ViewBag.Products ?? new List<ProductLookupItem>());
+    var warehouses = (List<LookupItem>)(ViewBag.Warehouses ?? new List<LookupItem>());
+    var customers = (List<LookupItem>)(ViewBag.Customers ?? new List<LookupItem>());
+    var units = products.Select(p => p.BaseUnit).Where(u => !string.IsNullOrWhiteSpace(u)).Distinct().OrderBy(u => u).ToList();
+
+    var issueTypes = new[]
+    {
+        (Value: IssueType.Sale,             Text: "فروش"),
+        (Value: IssueType.InternalUse,     Text: "مصرف داخلی"),
+        (Value: IssueType.Donation,        Text: "اهدا"),
+        (Value: IssueType.Scrap,           Text: "ضایعات"),
+        (Value: IssueType.ReturnToSupplier,Text: "مرجوعی به تامین‌کننده"),
+        (Value: IssueType.Transfer,        Text: "انتقال"),
+        (Value: IssueType.Waste,           Text: "دفع"),
+    };
+}
+
+<div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">بازگشت به فهرست</a>
+</div>
+
+<div asp-validation-summary="All" class="alert alert-danger"></div>
+
+<form method="post" asp-action="@(isEdit ? "Edit" : "Create")" id="issueForm">
+    @if (isEdit)
+    {
+        <input type="hidden" name="id" value="@Model.IssueId" />
+    }
+    <input type="hidden" asp-for="IssueId" />
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-box-arrow-up"></i> اطلاعات حواله خروج
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="ProductId" />
+                            <div class="col-12">
+                                <label class="form-label">کالا</label>
+                                <input class="form-control" disabled
+                                       value="@products.FirstOrDefault(p => p.Value == Model.ProductId)?.Text" />
+                                <div class="form-text">کالای حواله پس از ثبت قابل تغییر نیست.</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <label class="form-label" asp-for="ProductId"></label>
+                                <select class="form-select" asp-for="ProductId" id="ProductId">
+                                    <option value="">— انتخاب کنید —</option>
+                                    @foreach (var p in products)
+                                    {
+                                        var stock = p.Stock.HasValue
+                                            ? PersianDate.Digits(p.Stock.Value.ToString())
+                                            : "—";
+                                        <option value="@p.Value"
+                                                data-unit="@p.BaseUnit"
+                                                data-stock="@(p.Stock?.ToString() ?? "")">
+                                            @p.Text (@stock @p.BaseUnit)
+                                        </option>
+                                    }
+                                </select>
+                                <span class="text-danger small" asp-validation-for="ProductId"></span>
+                            </div>
+                        }
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">بارکدخوان</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="barcodeInput"
+                                       autocomplete="off" placeholder="بارکد را اسکن یا تایپ و Enter بزنید" />
+                                <button type="button" class="btn btn-outline-primary" id="barcodeBtn">خواندن</button>
+                            </div>
+                            <div class="form-text" id="barcodeHint">
+                                اسکنر مثل صفحه‌کلید تایپ می‌کند؛ کافی است فوکوس روی این کادر باشد.
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" asp-for="Type"></label>
+                            <select class="form-select" asp-for="Type" id="Type">
+                                @foreach (var t in issueTypes)
+                                {
+                                    <option value="@t.Value">@t.Text</option>
+                                }
+                            </select>
+                            <span class="text-danger small" asp-validation-for="Type"></span>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" asp-for="Quantity"></label>
+                            <input class="form-control" asp-for="Quantity" id="Quantity" />
+                            <span class="text-danger small" asp-validation-for="Quantity"></span>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" asp-for="Unit"></label>
+                            <input class="form-control" asp-for="Unit" list="unitList" id="Unit" />
+                            <datalist id="unitList">
+                                @foreach (var u in units)
+                                {
+                                    <option value="@u"></option>
+                                }
+                            </datalist>
+                            <span class="text-danger small" asp-validation-for="Unit"></span>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" asp-for="UnitSellingPrice"></label>
+                            <input class="form-control" asp-for="UnitSellingPrice" id="UnitSellingPrice" />
+                            <span class="text-danger small" asp-validation-for="UnitSellingPrice"></span>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">موجودی فعلی</label>
+                            <input class="form-control" id="currentStock" value="—" disabled />
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" asp-for="WarehouseId"></label>
+                            <select class="form-select" asp-for="WarehouseId">
+                                <option value="">— بدون انبار —</option>
+                                @foreach (var w in warehouses)
+                                {
+                                    <option value="@w.Value">@w.Text</option>
+                                }
+                            </select>
+                            <span class="text-danger small" asp-validation-for="WarehouseId"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6" id="customerField">
+                            <label class="form-label" asp-for="CustomerId"></label>
+                            <select class="form-select" asp-for="CustomerId" id="CustomerId">
+                                <option value="">— انتخاب کنید —</option>
+                                @foreach (var c in customers)
+                                {
+                                    <option value="@c.Value">@c.Text</option>
+                                }
+                            </select>
+                            <span class="text-danger small" asp-validation-for="CustomerId"></span>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" asp-for="InvoiceNumber"></label>
+                            <input class="form-control" asp-for="InvoiceNumber" />
+                            <span class="text-danger small" asp-validation-for="InvoiceNumber"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" asp-for="Description"></label>
+                            <textarea class="form-control" rows="2" asp-for="Description"></textarea>
+                            <span class="text-danger small" asp-validation-for="Description"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">
+                        @(isEdit ? "ذخیره تغییرات" : "ثبت حواله")
+                    </button>
+                    <a class="btn btn-outline-secondary" asp-action="Index">انصراف</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">خلاصه</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-7">مبلغ کل</dt>
+                        <dd class="col-5 text-end num" id="totalPrice">۰</dd>
+                    </dl>
+                    <div class="form-text mt-2">
+                        اگر قیمت فروش واحد خالی بماند، حواله بدون مبلغ ثبت می‌شود.
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i>
+                ثبت حواله موجودی را تغییر نمی‌دهد. کسر موجودی زمانی انجام می‌شود که
+                سرپرست حواله را تأیید کند.
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const qty = document.getElementById('Quantity');
+            const price = document.getElementById('UnitSellingPrice');
+            const unit = document.getElementById('Unit');
+            const product = document.getElementById('ProductId');
+            const typeSelect = document.getElementById('Type');
+            const customerField = document.getElementById('customerField');
+            const customer = document.getElementById('CustomerId');
+            const stockOut = document.getElementById('currentStock');
+            const barcodeInput = document.getElementById('barcodeInput');
+            const barcodeBtn = document.getElementById('barcodeBtn');
+            const barcodeHint = document.getElementById('barcodeHint');
+            const totalOut = document.getElementById('totalPrice');
+
+            function num(el) {
+                if (!el) return 0;
+                const raw = (el.value || '').replace(/[,،\u066c\s]/g, '').replace(/[۰-۹]/g,
+                    d => String(d.charCodeAt(0) - 0x06F0));
+                const n = parseFloat(raw);
+                return isNaN(n) ? 0 : n;
+            }
+
+            function recalc() {
+                totalOut.textContent = (num(qty) * num(price)).toLocaleString('fa-IR',
+                    { maximumFractionDigits: 2 });
+            }
+
+            // مشتری فقط در فروش معنا دارد؛ در بقیه حالت‌ها فیلد را پنهان می‌کنیم
+            // تا کاربر داده بی‌ربط وارد نکند.
+            function syncCustomerField() {
+                if (!typeSelect || !customerField) return;
+                // مقدار optionها نام enum است (asp-for نام را می‌فرستد، نه شماره).
+                const isSale = typeSelect.value === 'Sale';
+                customerField.style.display = isSale ? '' : 'none';
+                if (!isSale && customer) customer.value = '';
+            }
+
+            function syncStock() {
+                if (!product || !stockOut) return;
+                const opt = product.options[product.selectedIndex];
+                if (opt && opt.dataset.unit) unit.value = opt.dataset.unit;
+                const stock = opt ? opt.dataset.stock : '';
+                stockOut.value = (stock === '' || stock === undefined)
+                    ? '—'
+                    : stock.toLocaleString('fa-IR');
+            }
+
+            function lookupBarcode() {
+                const code = (barcodeInput.value || '').trim();
+                if (!code) return;
+                barcodeHint.textContent = 'در حال جستجو…';
+
+                fetch('/GoodsIssues/BarcodeLookup?barcode=' + encodeURIComponent(code))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.found) {
+                            if (product) product.value = data.productId;
+                            if (unit) unit.value = data.baseUnit || unit.value;
+                            barcodeInput.value = '';
+                            barcodeHint.textContent = data.message;
+                            syncStock();
+                            if (qty) { qty.focus(); qty.select(); }
+                            recalc();
+                        } else {
+                            barcodeHint.textContent = data.message;
+                        }
+                    })
+                    .catch(() => {
+                        barcodeHint.textContent = 'جستجوی بارکد ناموفق بود.';
+                    });
+            }
+
+            if (barcodeBtn) barcodeBtn.addEventListener('click', lookupBarcode);
+            if (barcodeInput) {
+                barcodeInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        lookupBarcode();
+                    }
+                });
+            }
+
+            if (product) product.addEventListener('change', syncStock);
+            if (typeSelect) typeSelect.addEventListener('change', syncCustomerField);
+            [qty, price].forEach(el => {
+                if (el) {
+                    el.addEventListener('input', recalc);
+                    el.addEventListener('blur', recalc);
+                }
+            });
+
+            syncCustomerField();
+            syncStock();
+            recalc();
+        })();
+    </script>
+}

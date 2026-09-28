@@ -20,6 +20,13 @@ namespace Application.Dto
         public DateTime InvoiceDate { get; set; }
         public DateTime IssueDate { get; set; }
         public string StatusText { get; set; }          // وضعیت (ثبت، تایید، لغو)
+
+        /// <summary>
+        /// کد عددی وضعیت: 0 = در انتظار تأیید، 1 = تأیید شده، 2 = لغو شده.
+        /// نمای صفحه برای تصمیم درباره نمایش دکمه «ویرایش» به این عدد نیاز دارد،
+        /// نه به متن.
+        /// </summary>
+        public byte Status { get; set; }
         public string BatchNumber { get; set; }
         public string Description { get; set; }
         public string TypeText { get; internal set; }
