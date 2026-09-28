@@ -1,0 +1,126 @@
+@model UserFormModel
+@{
+    ViewData["Title"] = Model.IsEdit ? "ویرایش کاربر" : "کاربر جدید";
+}
+
+<div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">بازگشت به فهرست</a>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<form method="post" asp-action="@(Model.IsEdit ? "Edit" : "Create")">
+    @if (Model.IsEdit)
+    {
+        @* مسیر ویرایش با id می‌آید؛ بدنه هم باید همان id را بفرستد. *@
+        <input type="hidden" name="id" value="@Model.Id" />
+    }
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white fw-semibold">اطلاعات کاربر</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="UserName"></label>
+                    @* نام کاربری در Identity یکتا و غیرقابل تغییر است. چون input
+                       غیرفعال در POST ارسال نمی‌شود، مقدار را با hidden می‌فرستیم تا
+                       اعتبارسنجی Required رد نشود. *@
+                    @if (Model.IsEdit)
+                    {
+                        <input type="hidden" asp-for="UserName" />
+                        <div class="form-control bg-body-secondary" dir="ltr" style="text-align:right">@Model.UserName</div>
+                        <div class="form-text">نام کاربری پس از ساخت قابل تغییر نیست.</div>
+                    }
+                    else
+                    {
+                        <input class="form-control" asp-for="UserName" autofocus dir="ltr" style="text-align:right" />
+                        <span class="text-danger small" asp-validation-for="UserName"></span>
+                    }
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="FullName"></label>
+                    <input class="form-control" asp-for="FullName" />
+                    <span class="text-danger small" asp-validation-for="FullName"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="PhoneNumber"></label>
+                    <input class="form-control" asp-for="PhoneNumber" dir="ltr" style="text-align:right" />
+                    <span class="text-danger small" asp-validation-for="PhoneNumber"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="Email"></label>
+                    <input class="form-control" asp-for="Email" dir="ltr" style="text-align:right" />
+                    <span class="text-danger small" asp-validation-for="Email"></span>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" asp-for="IsActive" />
+                        <label class="form-check-label" asp-for="IsActive"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white fw-semibold">نقش‌ها</div>
+        <div class="card-body">
+            @if (Model.AvailableRoles.Count == 0)
+            {
+                <div class="alert alert-warning mb-0">هنوز نقشی در سامانه تعریف نشده است.</div>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-3">
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <div class="form-check">
+                            @* چک‌باکس‌ها تک‌مقداری می‌فرستند، پس نامشان باید همان
+                               نامی باشد که مدل‌باندینگ در آرایه جمع می‌کند. *@
+                            <input class="form-check-input" type="checkbox" name="RolesSubmitted" value="@role"
+                                   id="role_@role" checked="@Model.Roles.Contains(role)" />
+                            <label class="form-check-label" for="role_@role">@role</label>
+                        </div>
+                    }
+                </div>
+                <div class="form-text">اگر هیچ نقشی انتخاب نشود، کاربر بدون نقش می‌ماند و به هیچ صفحه‌ای دسترسی نخواهد داشت.</div>
+            }
+            <span class="text-danger small" asp-validation-for="Roles"></span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white fw-semibold">رمز عبور</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="Password"></label>
+                    <input class="form-control" asp-for="Password" autocomplete="new-password" />
+                    <span class="text-danger small" asp-validation-for="Password"></span>
+                    @if (Model.IsEdit)
+                    {
+                        <div class="form-text">خالی بگذارید تا رمز فعلی تغییر نکند.</div>
+                    }
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="ConfirmPassword"></label>
+                    <input class="form-control" asp-for="ConfirmPassword" autocomplete="new-password" />
+                    <span class="text-danger small" asp-validation-for="ConfirmPassword"></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-primary" type="submit">ذخیره</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">انصراف</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

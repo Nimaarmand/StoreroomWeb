@@ -49,6 +49,13 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="GoodsIssues" asp-action="Index">حواله‌ها</a>
                     </li>
+                    @* مدیریت کاربران فقط برای مدیر سامانه؛ کنترلر هم AdminOnly است. *@
+                    @if (isAdmin)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Users" asp-action="Index">کاربران</a>
+                        </li>
+                    }
                 </ul>
 
                 <div class="d-flex align-items-center gap-3">
