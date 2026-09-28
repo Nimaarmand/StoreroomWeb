@@ -39,7 +39,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
 builder.Services.AddDbContext<IdentityContext>(options =>
     options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
-builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+// نباید IApplicationDbContext را با «new ApplicationDbContext» به صورت
+// جداگانه ثبت کرد، چون در آن حالت در هر scope دو نمونه و دو کانکشن
+// جدا ساخته می‌شود: یکی برای سرویس‌ها و یکی برای DbInitializer.
+// به‌جای آن همان نمونه ثبت‌شده را برمی‌گردانیم.
+builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
 // ============================================================
 // احراز هویت: Identity + Cookie

@@ -137,10 +137,24 @@ namespace Application.Features.Implementation.Category_Service
         public async Task<bool> IsValidParentCategoryAsync(int? parentId, int? currentCategoryId = null)
         {
             if (!parentId.HasValue) return true;
-            // برای دریافت والد از GetByIdAsync که خود قفل دارد استفاده می‌کنیم (نیازی به قفل اضافی نیست)
-            var parent = await GetByIdAsync(parentId.Value);
-            if (parent == null) return false;
             if (currentCategoryId.HasValue && parentId == currentCategoryId) return false;
+
+            // پیمودن زنجیره والد تا ریشه. بررسی فقط والد مستقیم کافی نیست:
+            // A والدِ B و B والدِ A یک حلقه می‌سازد که نه درخت را می‌شود رسم کرد
+            // و نه در بازگشت از رابط کاربری قابل گریز است.
+            var visited = new HashSet<int>();
+            var cursor = parentId;
+
+            while (cursor.HasValue)
+            {
+                if (!visited.Add(cursor.Value)) return false;          // حلقه از قبل در داده وجود دارد
+                if (currentCategoryId.HasValue && cursor == currentCategoryId) return false;
+
+                var node = await GetByIdAsync(cursor.Value);
+                if (node == null) return false;
+                cursor = node.ParentId;
+            }
+
             return true;
         }
 
@@ -167,7 +181,10 @@ namespace Application.Features.Implementation.Category_Service
             if (!await IsValidParentCategoryAsync(category.ParentId, category.CategoryId))
                 return (false, "والد انتخاب شده نامعتبر است (احتمالاً خود دسته یا نوادگان آن است)", null);
 
-            var existing = await GetByIdAsync(category.CategoryId); // GetByIdAsync قفل دارد
+            // AsNoTracking تا نمونه موجود tracked نشود؛ در غیر این صورت
+            // UpdateAsync با خطای «دو نمونه با همان کلید» شکست می‌خورد.
+            var existing = await _dbSet.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CategoryId == category.CategoryId);
             if (existing == null) return (false, "دسته‌بندی یافت نشد", null);
 
             category.CreatedAt = existing.CreatedAt;
@@ -189,6 +206,12 @@ namespace Application.Features.Implementation.Category_Service
                 var hasSub = await _dbSet.AnyAsync(c => c.ParentId == id);
                 if (hasSub)
                     return (false, "این دسته‌بندی دارای زیردسته است. ابتدا زیردسته‌ها را حذف یا جابه‌جا کنید.");
+
+                // کالاهای این دسته با حذف آن یتیم می‌شوند؛ رابطه NO ACTION
+                // است و بدون این بررسی خطای کلید خارجی به کاربر نشان داده می‌شود.
+                var productCount = await _context.Set<Product>().CountAsync(p => p.CategoryId == id);
+                if (productCount > 0)
+                    return (false, $"این دسته‌بندی {productCount} کالا دارد و قابل حذف نیست. ابتدا کالاها را به دسته دیگری منتقل کنید یا دسته را غیرفعال کنید.");
             }
             finally
             {

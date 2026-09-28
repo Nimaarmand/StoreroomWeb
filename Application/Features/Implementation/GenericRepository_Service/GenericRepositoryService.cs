@@ -129,6 +129,13 @@ namespace Application.Features.Implementation.GenericRepository_Service
             await DbLock.Semaphore.WaitAsync();
             try
             {
+                // اگر همین رکورد پیش‌تر در این scope بارگذاری شده باشد، نمونه
+                // قدیمی tracked است و attach کردن نمونه ورودیِ تازه با خطای
+                // «دو نمونه با همان کلید» شکست می‌خورد. الگوی رایج
+                // «اول رکورد را بخوان، بعد نسخه جدید را Update کن» دقیقاً
+                // همین مشکل را می‌سازد، پس نمونه قدیمی را جدا می‌کنیم.
+                DetachConflictingInstance(entity);
+
                 _dbSet.Update(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -136,6 +143,24 @@ namespace Application.Features.Implementation.GenericRepository_Service
             finally
             {
                 DbLock.Semaphore.Release();
+            }
+        }
+
+        private void DetachConflictingInstance(T entity)
+        {
+            foreach (var entry in _context.ChangeTracker.Entries<T>().ToList())
+            {
+                if (ReferenceEquals(entry.Entity, entity)) continue;
+
+                var key = entry.Metadata.FindPrimaryKey();
+                if (key == null) continue;
+
+                var sameKey = key.Properties.All(property =>
+                    Equals(property.GetGetter().GetClrValue(entry.Entity),
+                           property.GetGetter().GetClrValue(entity)));
+
+                if (sameKey)
+                    entry.State = EntityState.Detached;
             }
         }
 

@@ -1,6 +1,8 @@
+using Application.Features.Definition.Context;
 using Application.Features.Definition.GenericRepository;
 using Application.Features.Definition.Warehouse_Service;
 using Domain.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,10 +13,12 @@ namespace Application.Features.Implementation.Warehouse_Service
     public class WarehouseService : IWarehouseService
     {
         private readonly IGenericRepository<Warehouse> _warehouseRepo;
+        private readonly IApplicationDbContext _context;
 
-        public WarehouseService(IGenericRepository<Warehouse> warehouseRepo)
+        public WarehouseService(IGenericRepository<Warehouse> warehouseRepo, IApplicationDbContext context)
         {
             _warehouseRepo = warehouseRepo ?? throw new ArgumentNullException(nameof(warehouseRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         // ========== CRUD ==========
@@ -28,10 +32,33 @@ namespace Application.Features.Implementation.Warehouse_Service
             => await _warehouseRepo.AddAsync(warehouse);
 
         public async Task<Warehouse> UpdateAsync(Warehouse warehouse)
-            => await _warehouseRepo.UpdateAsync(warehouse);
+        {
+            // موجودی انبار فقط با رسید و حواله تغییر می‌کند؛ مقدار ارسالی از
+            // فرم ویرایش نباید آن را بازنویسی کند. این قانون دامنه است،
+            // پس اینجا اعمال می‌شود نه در کنترلر.
+            var current = await _warehouseRepo.GetByIdAsync(warehouse.WarehouseId);
+            if (current == null) throw new InvalidOperationException("انبار یافت نشد");
 
-        public async Task DeleteAsync(int id)
-            => await _warehouseRepo.RemoveByIdAsync(id);
+            warehouse.Number = current.Number;
+            return await _warehouseRepo.UpdateAsync(warehouse);
+        }
+
+        public async Task<(bool Success, string Message)> DeleteAsync(int id)
+        {
+            var warehouse = await GetByIdAsync(id);
+            if (warehouse == null) return (false, "انبار یافت نشد");
+
+            // انبار دارای تراکنش نباید حذف شود؛ بدون این بررسی خطای خام
+            // کلید خارجی به کاربر نشان داده می‌شود.
+            var receiptCount = await _context.Set<GoodsReceipt>().CountAsync(r => r.WarehouseId == id);
+            var issueCount = await _context.Set<GoodsIssue>().CountAsync(i => i.WarehouseId == id);
+
+            if (receiptCount > 0 || issueCount > 0)
+                return (false, $"این انبار {receiptCount} رسید و {issueCount} حواله دارد و به دلیل حفظ سوابق مالی قابل حذف نیست.");
+
+            await _warehouseRepo.RemoveByIdAsync(id);
+            return (true, "انبار با موفقیت حذف شد");
+        }
 
         public Task<IEnumerable<Warehouse>> GetTopWarehousesAsync(int count)
         {

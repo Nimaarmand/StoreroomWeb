@@ -24,6 +24,45 @@ public static class DbInitializer
 
         await SeedRolesAsync(provider.GetRequiredService<RoleManager<Role>>());
         await SeedAdminUserAsync(provider.GetRequiredService<UserManager<ApplicationUser>>());
+
+        // کاربران نمونه فقط در توسعه ساخته می‌شوند. ساختن آن‌ها در محیط
+        // عملیاتی یعنی داشتن سه حساب با رمز ثابت و قابل حدس.
+        if (provider.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
+            await SeedDemoUsersAsync(provider.GetRequiredService<UserManager<ApplicationUser>>());
+    }
+
+    private static async Task SeedDemoUsersAsync(UserManager<ApplicationUser> userManager)
+    {
+        (string UserName, string Password, string FullName, string Role)[] demoUsers =
+        {
+            ("manager", "Manager@123", "سرپرست انبار", "Manager"),
+            ("user", "User@123", "کاربر انبار", "User"),
+        };
+
+        foreach (var (userName, password, fullName, role) in demoUsers)
+        {
+            var existing = await userManager.FindByNameAsync(userName);
+            if (existing == null)
+            {
+                var created = await userManager.CreateAsync(new ApplicationUser
+                {
+                    UserName = userName,
+                    Email = $"{userName}@storeroom.local",
+                    FullName = fullName,
+                    EmailConfirmed = true,
+                }, password);
+
+                if (!created.Succeeded)
+                    throw new InvalidOperationException(
+                        $"ساخت کاربر نمونه «{userName}» ناموفق بود: " +
+                        string.Join("، ", created.Errors.Select(e => e.Description)));
+
+                existing = await userManager.FindByNameAsync(userName);
+            }
+
+            if (existing != null && !await userManager.IsInRoleAsync(existing, role))
+                await userManager.AddToRolesAsync(existing, [role]);
+        }
     }
 
     private static async Task SeedRolesAsync(RoleManager<Role> roleManager)

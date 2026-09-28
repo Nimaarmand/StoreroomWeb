@@ -1,4 +1,4 @@
-﻿﻿using Application.Features.Implementation.Warehouse_Service;
+﻿using Application.Features.Implementation.Warehouse_Service;
 using Domain.Entity;
 using ReaLTaiizor.Forms;
 using System;
@@ -130,8 +130,13 @@ namespace StoreRoom.Forms
             {
                 try
                 {
-                    await _warehouseService.DeleteAsync(_selectedWarehouseId);
-                    MessageBox.Show("انبار با موفقیت حذف شد.", "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    var (success, message) = await _warehouseService.DeleteAsync(_selectedWarehouseId);
+                    if (!success)
+                    {
+                        MessageBox.Show(message, "هشدار", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    MessageBox.Show(message, "موفق", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     await LoadWarehousesAsync(showEmptyMessage: false);
                 }
                 catch (Exception ex)

@@ -97,7 +97,10 @@ namespace Application.Features.Implementation.Customer_Service
             if (await IsNameExistsAsync(customer.Name, customer.CustomerId))
                 return (false, "مشتری با این نام قبلاً ثبت شده است", null);
 
-            var existing = await GetByIdAsync(customer.CustomerId);
+            // AsNoTracking تا نمونه موجود tracked نشود؛ در غیر این صورت
+            // UpdateAsync با خطای «دو نمونه با همان کلید» شکست می‌خورد.
+            var existing = await _dbSet.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CustomerId == customer.CustomerId);
             if (existing == null) return (false, "مشتری یافت نشد", null);
 
             customer.Creationdate = existing.Creationdate;
@@ -109,6 +112,16 @@ namespace Application.Features.Implementation.Customer_Service
         {
             var customer = await GetByIdAsync(id);
             if (customer == null) return (false, "مشتری یافت نشد");
+
+            // رابطه به‌صورت اختیاری تعریف شده و در دیتابیس NO ACTION است، پس
+            // حذف مشتریِ دارای حواله به خطای خام کلید خارجی ختم می‌شود.
+            // پیش از رسیدن به دیتابیس بررسی می‌کنیم تا پیام قابل فهم بدهیم.
+            var issueCount = await _context.Set<GoodsIssue>()
+                .CountAsync(i => i.CustomerId == id);
+
+            if (issueCount > 0)
+                return (false, $"این مشتری {issueCount} حواله دارد و قابل حذف نیست. حواله‌ها را ابتدا بررسی کنید.");
+
             await RemoveAsync(customer);
             return (true, "مشتری با موفقیت حذف شد");
         }

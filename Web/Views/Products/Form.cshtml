@@ -1,0 +1,115 @@
+@model ProductFormModel
+@{
+    var isEdit = Model.ProductId != Guid.Empty && ViewContext.RouteData.Values.ContainsKey("id");
+    var categories = ViewBag.Categories as List<Category>;
+    ViewData["Title"] = isEdit ? "ویرایش کالا" : "کالای جدید";
+}
+
+<div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">بازگشت به فهرست</a>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<form method="post" asp-action="@(isEdit ? "Edit" : "Create")">
+    @if (isEdit)
+    {
+        <input type="hidden" name="id" value="@Model.ProductId" />
+    }
+    <input type="hidden" asp-for="ProductId" />
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white fw-semibold">اطلاعات کالا</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="Name"></label>
+                    <input class="form-control" asp-for="Name" autofocus />
+                    <span class="text-danger small" asp-validation-for="Name"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="CategoryId"></label>
+                    <select class="form-select" asp-for="CategoryId">
+                        <option value="">بدون دسته‌بندی</option>
+                        @foreach (var c in categories ?? new List<Category>())
+                        {
+                            <option value="@c.CategoryId">@c.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label" asp-for="BaseUnit"></label>
+                    <input class="form-control" asp-for="BaseUnit" placeholder="عدد / کیلوگرم" />
+                    <span class="text-danger small" asp-validation-for="BaseUnit"></span>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label" asp-for="Barcode"></label>
+                    <input class="form-control" asp-for="Barcode" />
+                    <span class="text-danger small" asp-validation-for="Barcode"></span>
+                </div>
+
+                @if (!isEdit)
+                {
+                    <div class="col-6 col-md-3">
+                        <label class="form-label" asp-for="Number"></label>
+                        <input class="form-control" asp-for="Number" />
+                        <span class="text-danger small" asp-validation-for="Number"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">موجودی فعلی</label>
+                        <input class="form-control" value="ثبت‌شده در سیستم" disabled />
+                        <div class="form-text">موجودی فقط با رسید و حواله تغییر می‌کند.</div>
+                    </div>
+                }
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label" asp-for="MinStockLevel"></label>
+                    <input class="form-control" asp-for="MinStockLevel" step="any" />
+                    <span class="text-danger small" asp-validation-for="MinStockLevel"></span>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label" asp-for="MaxStockLevel"></label>
+                    <input class="form-control" asp-for="MaxStockLevel" step="any" />
+                    <span class="text-danger small" asp-validation-for="MaxStockLevel"></span>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label" asp-for="Weight"></label>
+                    <input class="form-control" asp-for="Weight" step="any" />
+                    <span class="text-danger small" asp-validation-for="Weight"></span>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label" asp-for="ProductionDate"></label>
+                    <input class="form-control" asp-for="ProductionDate" type="date" />
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <label class="form-label" asp-for="ExpirationDate"></label>
+                    <input class="form-control" asp-for="ExpirationDate" type="date" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" asp-for="Description"></label>
+                    <textarea class="form-control" asp-for="Description" rows="2"></textarea>
+                    <span class="text-danger small" asp-validation-for="Description"></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-primary" type="submit">ذخیره</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">انصراف</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

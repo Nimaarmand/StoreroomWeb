@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Application.Features.Definition.Context
@@ -20,6 +21,13 @@ namespace Application.Features.Definition.Context
         /// و دیگر نیازی به cast کردن به DbContext ندارند.
         /// </summary>
         DatabaseFacade Database { get; }
+
+        /// <summary>
+        /// ردیابی تغییرات. برای آزادکردن نمونه‌ای که پیش‌تر با همان کلید
+        /// بارگذاری شده لازم است؛ در غیر این صورت Update با خطای
+        /// «دو نمونه با همان کلید» شکست می‌خورد.
+        /// </summary>
+        ChangeTracker ChangeTracker { get; }
 
         int SaveChanges();
 

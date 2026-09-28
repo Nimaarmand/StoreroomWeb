@@ -1,0 +1,83 @@
+@model List<Warehouse>
+@{
+    ViewData["Title"] = "انبارها";
+    var keyword = (string?)ViewData["Keyword"];
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">انبارها <span class="text-secondary fs-6">(@Model.Count)</span></h1>
+    <a class="btn btn-primary" asp-action="Create">انبار جدید</a>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-12 col-md-5">
+        <label class="form-label" for="keyword">جست‌وجو</label>
+        <input class="form-control" id="keyword" name="keyword" value="@keyword" placeholder="نام انبار یا محل" />
+    </div>
+    <div class="col-12 col-md-4 d-flex gap-2">
+        <button class="btn btn-outline-primary" type="submit">اعمال</button>
+        @if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            <a class="btn btn-outline-secondary" asp-action="Index">حذف فیلتر</a>
+        }
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">انباری برای نمایش وجود ندارد.</div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>نام</th>
+                        <th>محل</th>
+                        <th class="text-center">ظرفیت</th>
+                        <th class="text-center">موجودی</th>
+                        <th>وضعیت</th>
+                        <th class="text-center">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var w in Model)
+                {
+                    var percent = w.Max > 0 ? (int)Math.Round((double)w.Number / (double)w.Max * 100.0) : 0;
+                    <tr>
+                        <td class="fw-semibold">@w.Name</td>
+                        <td>@(string.IsNullOrWhiteSpace(w.Location) ? "-" : w.Location)</td>
+                        <td class="text-center">@PersianNumberConverter.ToPersianDigits(w.Min) – @PersianNumberConverter.ToPersianDigits(w.Max)</td>
+                        <td style="min-width: 9rem">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>@PersianNumberConverter.ToPersianDigits(w.Number)</span>
+                                <span class="text-secondary">@PersianNumberConverter.ToPersianDigits(percent)٪</span>
+                            </div>
+                            <div class="progress" style="height: 6px" role="progressbar"
+                                 aria-label="درصد پرشدن @w.Name" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar @(percent >= 90 ? "bg-danger" : percent >= 70 ? "bg-warning" : "bg-success")"
+                                     style="width: @Math.Min(percent, 100)%"></div>
+                            </div>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(w.Status))
+                            {
+                                <span class="badge text-bg-secondary">@w.Status</span>
+                            }
+                            else
+                            {
+                                <span class="text-secondary">-</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@w.WarehouseId">ویرایش</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

@@ -1,0 +1,58 @@
+@model CustomerFormModel
+@{
+    var isEdit = ViewContext.RouteData.Values.ContainsKey("id");
+    ViewData["Title"] = isEdit ? "ویرایش مشتری" : "مشتری جدید";
+}
+
+<div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">بازگشت به فهرست</a>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<form method="post" asp-action="@(isEdit ? "Edit" : "Create")">
+    @if (isEdit)
+    {
+        <input type="hidden" name="id" value="@Model.CustomerId" />
+    }
+    <input type="hidden" asp-for="CustomerId" />
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white fw-semibold">اطلاعات مشتری</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="Name"></label>
+                    <input class="form-control" asp-for="Name" autofocus />
+                    <span class="text-danger small" asp-validation-for="Name"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="Phone"></label>
+                    <input class="form-control" asp-for="Phone" dir="ltr" style="text-align:right" />
+                    <span class="text-danger small" asp-validation-for="Phone"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" asp-for="MarketName"></label>
+                    <input class="form-control" asp-for="MarketName" />
+                    <span class="text-danger small" asp-validation-for="MarketName"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" asp-for="Address"></label>
+                    <textarea class="form-control" asp-for="Address" rows="2"></textarea>
+                    <span class="text-danger small" asp-validation-for="Address"></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-primary" type="submit">ذخیره</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">انصراف</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

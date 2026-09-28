@@ -1,0 +1,63 @@
+@model CategoryFormModel
+@{
+    var isEdit = ViewContext.RouteData.Values.ContainsKey("id");
+    var parents = ViewBag.Parents as List<Category>;
+    ViewData["Title"] = isEdit ? "ویرایش دسته‌بندی" : "دسته‌بندی جدید";
+}
+
+<div class="mb-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="Index">بازگشت به فهرست</a>
+</div>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<form method="post" asp-action="@(isEdit ? "Edit" : "Create")">
+    @if (isEdit)
+    {
+        <input type="hidden" name="id" value="@Model.CategoryId" />
+    }
+    <input type="hidden" asp-for="CategoryId" />
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white fw-semibold">اطلاعات دسته‌بندی</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="Name"></label>
+                    <input class="form-control" asp-for="Name" autofocus />
+                    <span class="text-danger small" asp-validation-for="Name"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label" asp-for="ParentId"></label>
+                    <select class="form-select" asp-for="ParentId">
+                        <option value="">بدون والد (دسته اصلی)</option>
+                        @foreach (var p in parents ?? new List<Category>())
+                        {
+                            if (isEdit && p.CategoryId == Model.CategoryId)
+                            {
+                                continue;  // جلوگیری از والدِ خودِ کالا در فرم
+                            }
+                            <option value="@p.CategoryId">@p.Name</option>
+                        }
+                    </select>
+                    <div class="form-text">دسته‌بندی نمی‌تواند والدِ خودش یا والدِ یکی از زیرمجموعه‌هایش باشد.</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" asp-for="Description"></label>
+                    <textarea class="form-control" asp-for="Description" rows="2"></textarea>
+                    <span class="text-danger small" asp-validation-for="Description"></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-primary" type="submit">ذخیره</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">انصراف</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

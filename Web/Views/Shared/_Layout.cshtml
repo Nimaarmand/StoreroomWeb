@@ -85,6 +85,22 @@
     </nav>
 
     <main class="container-fluid py-4 px-lg-4">
+        @* پیام‌های نتیجه عملیات؛ بدون این بخش کاربر پس از ریدایرکت
+           هیچ بازخوردی از موفقیت یا خطای اعتبارسنجی نمی‌بیند. *@
+        @if (TempData["Message"] is string message && !string.IsNullOrWhiteSpace(message))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @message
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
+            </div>
+        }
+        @if (TempData["Error"] is string error && !string.IsNullOrWhiteSpace(error))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @error
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
+            </div>
+        }
         @RenderBody()
     </main>
 

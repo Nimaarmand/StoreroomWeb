@@ -248,8 +248,14 @@ namespace Application.Features.Implementation.Product_Service
                 if (!categoryExists) return (false, "دسته‌بندی انتخابی وجود ندارد", null);
             }
 
-            var existing = await GetByIdAsync(product.ProductId);
+            // AsNoTracking لازم است: اگر رکورد موجود را tracked بارگذاری
+            // کنیم و بعد نمونه ورودیِ جداگانه را به Update بدهیم، EF با خطای
+            // «دو نمونه با همان کلید» شکست می‌خورد. اینجا فقط وجود رکورد
+            // را چک می‌کنیم تا UpdateAsync بتواند نمونه ورودی را attach کند.
+            var existing = await _dbSet.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
             if (existing == null) return (false, "محصول یافت نشد", null);
+
             product.CreatedAt = existing.CreatedAt;
             product.IsActive = existing.IsActive;
             var updated = await UpdateAsync(product);
@@ -260,6 +266,15 @@ namespace Application.Features.Implementation.Product_Service
         {
             var product = await GetByIdAsync(productId);
             if (product == null) return (false, "محصول یافت نشد");
+
+            // محصول دارای سابقه تراکنش نباید حذف شود؛ تاریخچه انبار باید
+            // قابل حسابرسی بماند. حذف فقط برای محصول بدون تراکنش مجاز است.
+            var receiptCount = await _context.Set<GoodsReceipt>().CountAsync(r => r.ProductId == productId);
+            var issueCount = await _context.Set<GoodsIssue>().CountAsync(i => i.ProductId == productId);
+
+            if (receiptCount > 0 || issueCount > 0)
+                return (false, $"این محصول {receiptCount} رسید و {issueCount} حواله دارد و به دلیل حفظ سوابق مالی قابل حذف نیست. آن را غیرفعال کنید.");
+
             await RemoveAsync(product);
             return (true, "محصول با موفقیت حذف شد");
         }
