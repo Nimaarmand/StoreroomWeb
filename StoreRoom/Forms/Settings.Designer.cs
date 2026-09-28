@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             panel2 = new ReaLTaiizor.Controls.Panel();
-            hopeButton4 = new ReaLTaiizor.Controls.HopeButton();
             hopeButton3 = new ReaLTaiizor.Controls.HopeButton();
             hopeButton2 = new ReaLTaiizor.Controls.HopeButton();
             hopeButton14 = new ReaLTaiizor.Controls.HopeButton();
@@ -41,7 +40,6 @@
             // panel2
             // 
             panel2.BackColor = Color.FromArgb(39, 51, 63);
-            panel2.Controls.Add(hopeButton4);
             panel2.Controls.Add(hopeButton3);
             panel2.Controls.Add(hopeButton2);
             panel2.Controls.Add(hopeButton14);
@@ -55,27 +53,6 @@
             panel2.SmoothingType = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             panel2.TabIndex = 2;
             panel2.Text = "panel2";
-            // 
-            // hopeButton4
-            // 
-            hopeButton4.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            hopeButton4.BorderColor = Color.FromArgb(220, 223, 230);
-            hopeButton4.ButtonType = ReaLTaiizor.Util.HopeButtonType.Primary;
-            hopeButton4.DangerColor = Color.FromArgb(245, 108, 108);
-            hopeButton4.DefaultColor = Color.FromArgb(255, 255, 255);
-            hopeButton4.Font = new Font("Tahoma", 12F, FontStyle.Bold);
-            hopeButton4.HoverTextColor = Color.FromArgb(48, 49, 51);
-            hopeButton4.InfoColor = Color.FromArgb(144, 147, 153);
-            hopeButton4.Location = new Point(4, 410);
-            hopeButton4.Name = "hopeButton4";
-            hopeButton4.PrimaryColor = Color.FromArgb(64, 158, 255);
-            hopeButton4.Size = new Size(171, 79);
-            hopeButton4.SuccessColor = Color.FromArgb(103, 194, 58);
-            hopeButton4.TabIndex = 17;
-            hopeButton4.Text = "کد ماشین";
-            hopeButton4.TextColor = Color.White;
-            hopeButton4.WarningColor = Color.FromArgb(230, 162, 60);
-            hopeButton4.Click += hopeButton4_Click;
             // 
             // hopeButton3
             // 
@@ -193,7 +170,6 @@
         private ReaLTaiizor.Controls.HopeButton hopeButton14;
         private ReaLTaiizor.Controls.HopeButton hopeButton3;
         private ReaLTaiizor.Controls.HopeButton hopeButton2;
-        private ReaLTaiizor.Controls.HopeButton hopeButton4;
         private Panel panel1;
     }
 }

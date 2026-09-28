@@ -56,24 +56,6 @@ namespace StoreRoom
                 Logger.Log($"📂 مسیر اجرا: {AppDomain.CurrentDomain.BaseDirectory}");
                 Logger.Log($"🧠 نسخه دات‌نت: {Environment.Version}");
 
-                Logger.Log("🔍 در حال بررسی لایسنس...");
-                var license = LicenseManager.ValidateLicense();
-                if (license == null)
-                {
-                    string machineCode = HardwareHelper.GetMachineCode();
-                    Logger.Log($"❌ لایسنس نامعتبر - کد ماشین: {machineCode}");
-                    MessageBox.Show(
-                        $"لایسنس معتبر نیست!\n\n" +
-                        $"کد ماشین شما:\n{machineCode}\n\n" +
-                        "لطفاً این کد را برای دریافت لایسنس به پشتیبانی ارسال کنید.",
-                        "خطای لایسنس",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
-
-                Logger.Log($"✅ لایسنس معتبر - وضعیت: {license.GetStatusText()}");
-
                 string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=StoreroomDB;Trusted_Connection=True;TrustServerCertificate=True;";
                 ApplicationConfiguration.Initialize();
 
@@ -253,7 +235,6 @@ namespace StoreRoom
                     services.AddTransient<Form24>();
                     services.AddTransient<Form27>();
                     services.AddTransient<Settings>();
-                    services.AddTransient<FormMachineCode>();
                     services.AddTransient<ContactUs>();
                     Logger.Log("✅ فرم‌ها با موفقیت ثبت شدند");
                 }

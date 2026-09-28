@@ -104,12 +104,6 @@ namespace StoreRoom.Forms
             ShowFormInPanel(form16, fillPanel: false);
         }
 
-        private void hopeButton4_Click(object sender, EventArgs e)
-        {
-            var FormMachineCode = Program.ServiceProvider.GetRequiredService<FormMachineCode>();
-            ShowFormInPanel(FormMachineCode, fillPanel: false);
-        }
-
         private void Settings_Load(object sender, EventArgs e)
         {
 
