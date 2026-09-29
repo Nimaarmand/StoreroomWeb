@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace persistence.Migrations.Identity
+namespace Persistence.Migrations.Identity
 {
     /// <inheritdoc />
     public partial class Init : Migration

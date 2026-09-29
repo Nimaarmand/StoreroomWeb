@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace persistence.Migrations
+namespace Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class MakeOptionalTextColumnsNullable : Migration

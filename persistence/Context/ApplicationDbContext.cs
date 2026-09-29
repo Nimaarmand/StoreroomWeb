@@ -1,8 +1,8 @@
-﻿using Application.Features.Definition.Context;
+using Application.Features.Definition.Context;
 using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistans.Context
+namespace Persistence.Context
 {
     public class ApplicationDbContext : DbContext, IApplicationDbContext
     {

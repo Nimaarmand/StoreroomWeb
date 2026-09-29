@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Persistans.Context
+namespace Persistence.Context
 {
     /// <summary>
     /// این کلاس فقط برای ابزارهای خط فرمان (dotnet ef) استفاده می‌شود و در زمان اجرا

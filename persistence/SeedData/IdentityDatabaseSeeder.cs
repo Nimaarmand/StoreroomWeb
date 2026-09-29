@@ -1,10 +1,10 @@
-﻿using Domain.Entity;
+using Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace StoreRoom.Data
+namespace Persistence.SeedData
 {
     public class IdentityDatabaseSeeder
     {
@@ -89,13 +89,13 @@ namespace StoreRoom.Data
             var passwordValidators = new List<IPasswordValidator<ApplicationUser>> { new PasswordValidator<ApplicationUser>() };
 
             return new UserManager<ApplicationUser>(
-                store, null, passwordHasher, userValidators, passwordValidators, null, null, null, null);
+                store, null!, passwordHasher, userValidators, passwordValidators, null!, null!, null!, null!);
         }
 
         private RoleManager<Role> CreateRoleManager(IdentityContext context)
         {
             var store = new RoleStore<Role, IdentityContext, string>(context);
-            return new RoleManager<Role>(store, null, null, null, null);
+            return new RoleManager<Role>(store, null!, null!, null!, null!);
         }
     }
 }

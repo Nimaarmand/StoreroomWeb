@@ -1,3 +1,29 @@
-.vs/
+# خروجی کامپایل
 bin/
 obj/
+[Dd]ebug/
+[Rr]elease/
+*.dll
+*.exe
+*.pdb
+
+# ویژوال استودیو
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# آی‌دی‌ای
+.vscode/
+.idea/
+
+# سیستم‌عامل
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# فایل‌های موقت
+*.log
+*.bak
+*.tmp

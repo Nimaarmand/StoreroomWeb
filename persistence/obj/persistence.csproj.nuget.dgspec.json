@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\persistence\\persistence.csproj": {}
+    "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\Persistence\\Persistence.csproj": {}
   },
   "projects": {
     "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\Application\\Application.csproj": {
@@ -710,14 +710,14 @@
         }
       }
     },
-    "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\persistence\\persistence.csproj": {
+    "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\Persistence\\Persistence.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\persistence\\persistence.csproj",
-        "projectName": "persistence",
-        "projectPath": "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\persistence\\persistence.csproj",
+        "projectUniqueName": "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\Persistence\\Persistence.csproj",
+        "projectName": "Persistence",
+        "projectPath": "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\Persistence\\Persistence.csproj",
         "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-        "outputPath": "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\persistence\\obj\\",
+        "outputPath": "D:\\Files\\Business Project\\StoreroomWb\\StoreRoom\\Persistence\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\DevExpress 23.1\\Components\\Offline Packages",
