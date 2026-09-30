@@ -25,7 +25,7 @@ namespace Application.Features.Implementation.Warehouse_Service
         public async Task<IEnumerable<Warehouse>> GetAllAsync()
             => await _warehouseRepo.GetAllAsync();
 
-        public async Task<Warehouse> GetByIdAsync(int id)
+        public async Task<Warehouse?> GetByIdAsync(int id)
             => await _warehouseRepo.GetByIdAsync(id);
 
         public async Task<Warehouse> AddAsync(Warehouse warehouse)
@@ -66,7 +66,7 @@ namespace Application.Features.Implementation.Warehouse_Service
         }
 
         // ========== متدهای اختصاصی ==========
-        public async Task<Warehouse> GetByNameAsync(string name)
+        public async Task<Warehouse?> GetByNameAsync(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return null;
             var items = await _warehouseRepo.FindAsync(w => w.Name == name);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
@@ -14,7 +14,7 @@ namespace Application.Features.Definition.GenericRepository
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
 
         // دریافت یک رکورد بر اساس کلید اصلی
-        Task<T> GetByIdAsync(params object[] keyValues);
+        Task<T?> GetByIdAsync(params object[] keyValues);
 
         // دریافت تعداد مشخصی رکورد (از ابتدا)
         Task<IEnumerable<T>> TakeAsync(int count);

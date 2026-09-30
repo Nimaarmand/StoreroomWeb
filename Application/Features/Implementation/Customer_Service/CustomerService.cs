@@ -13,134 +13,93 @@ namespace Application.Features.Implementation.Customer_Service
 {
     public class CustomerService : GenericRepository<Customer>, ICustomerService
     {
-        public CustomerService(IApplicationDbContext context, IDbLock dbLock) : base(context, dbLock)
+        public CustomerService(IApplicationDbContext context) : base(context)
         {
         }
 
         public async Task<IEnumerable<Customer>> GetTopCustomersAsync(int count)
         {
-            await DbLock.Semaphore.WaitAsync();
-            try
-            {
-                return await _dbSet
-                    .OrderByDescending(p => p.CustomerId)
-                    .Take(count)
-                    .ToListAsync();
-            }
-            finally
-            {
-                DbLock.Semaphore.Release();
-            }
+            return await _dbSet
+                .OrderByDescending(p => p.CustomerId)
+                .Take(count)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Customer>> SearchByNameAsync(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return await GetAllAsync();
-
-            await DbLock.Semaphore.WaitAsync();
-            try
-            {
-                return await _dbSet.Where(c => c.Name.Contains(name)).ToListAsync();
-            }
-            finally
-            {
-                DbLock.Semaphore.Release();
-            }
+            return await _dbSet.Where(c => c.Name.Contains(name)).ToListAsync();
         }
 
-        public async Task<Customer> GetByPhoneAsync(string phone)
+        public async Task<Customer?> GetByPhoneAsync(string phone)
         {
             if (string.IsNullOrWhiteSpace(phone)) return null;
-            await DbLock.Semaphore.WaitAsync();
-            try
-            {
-                return await _dbSet.FirstOrDefaultAsync(c => c.Phone == phone);
-            }
-            finally
-            {
-                DbLock.Semaphore.Release();
-            }
+            return await _dbSet.FirstOrDefaultAsync(c => c.Phone == phone);
         }
 
         public async Task<bool> IsNameExistsAsync(string name, int? excludeId = null)
         {
-            await DbLock.Semaphore.WaitAsync();
-            try
-            {
-                var query = _dbSet.Where(c => c.Name == name);
-                if (excludeId.HasValue)
-                    query = query.Where(c => c.CustomerId != excludeId.Value);
-                return await query.AnyAsync();
-            }
-            finally
-            {
-                DbLock.Semaphore.Release();
-            }
+            var query = _dbSet.Where(c => c.Name == name);
+            if (excludeId.HasValue)
+                query = query.Where(c => c.CustomerId != excludeId.Value);
+            return await query.AnyAsync();
         }
 
-        public async Task<(bool Success, string Message, Customer Customer)> CreateCustomerAsync(Customer customer)
+        public async Task<(bool Success, string Message, Customer? Customer)> CreateCustomerAsync(Customer customer)
         {
-            if (customer == null) return (false, "مشتری نامعتبر است", null);
-            if (string.IsNullOrWhiteSpace(customer.Name)) return (false, "نام مشتری نمی‌تواند خالی باشد", null);
-            if (await IsNameExistsAsync(customer.Name)) return (false, "مشتری با این نام قبلاً ثبت شده است", null);
+            if (customer == null) return (false, "Ù…Ø´ØªØ±ÛŒ Ù†Ø§Ù…Ø¹ØªØ¨Ø± Ø§Ø³Øª", null);
+            if (string.IsNullOrWhiteSpace(customer.Name)) return (false, "Ù†Ø§Ù… Ù…Ø´ØªØ±ÛŒ Ù†Ù…ÛŒâ€ŒØªÙˆØ§Ù†Ø¯ Ø®Ø§Ù„ÛŒ Ø¨Ø§Ø´Ø¯", null);
+            if (await IsNameExistsAsync(customer.Name)) return (false, "Ù…Ø´ØªØ±ÛŒ Ø¨Ø§ Ø§ÛŒÙ† Ù†Ø§Ù… Ù‚Ø¨Ù„Ø§Ù‹ Ø«Ø¨Øª Ø´Ø¯Ù‡ Ø§Ø³Øª", null);
 
             customer.Creationdate = DateTime.Now;
             var created = await AddAsync(customer);
-            return (true, "مشتری با موفقیت اضافه شد", created);
+            return (true, "Ù…Ø´ØªØ±ÛŒ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø§Ø¶Ø§ÙÙ‡ Ø´Ø¯", created);
         }
 
-        public async Task<(bool Success, string Message, Customer Customer)> UpdateCustomerAsync(Customer customer)
+        public async Task<(bool Success, string Message, Customer? Customer)> UpdateCustomerAsync(Customer customer)
         {
-            if (customer == null) return (false, "مشتری نامعتبر است", null);
-            if (string.IsNullOrWhiteSpace(customer.Name)) return (false, "نام مشتری نمی‌تواند خالی باشد", null);
+            if (customer == null) return (false, "Ù…Ø´ØªØ±ÛŒ Ù†Ø§Ù…Ø¹ØªØ¨Ø± Ø§Ø³Øª", null);
+            if (string.IsNullOrWhiteSpace(customer.Name)) return (false, "Ù†Ø§Ù… Ù…Ø´ØªØ±ÛŒ Ù†Ù…ÛŒâ€ŒØªÙˆØ§Ù†Ø¯ Ø®Ø§Ù„ÛŒ Ø¨Ø§Ø´Ø¯", null);
             if (await IsNameExistsAsync(customer.Name, customer.CustomerId))
-                return (false, "مشتری با این نام قبلاً ثبت شده است", null);
+                return (false, "Ù…Ø´ØªØ±ÛŒ Ø¨Ø§ Ø§ÛŒÙ† Ù†Ø§Ù… Ù‚Ø¨Ù„Ø§Ù‹ Ø«Ø¨Øª Ø´Ø¯Ù‡ Ø§Ø³Øª", null);
 
-            // AsNoTracking تا نمونه موجود tracked نشود؛ در غیر این صورت
-            // UpdateAsync با خطای «دو نمونه با همان کلید» شکست می‌خورد.
+            // AsNoTracking ØªØ§ Ù†Ù…ÙˆÙ†Ù‡ Ù…ÙˆØ¬ÙˆØ¯ tracked Ù†Ø´ÙˆØ¯Ø› Ø¯Ø± ØºÛŒØ± Ø§ÛŒÙ† ØµÙˆØ±Øª
+            // UpdateAsync Ø¨Ø§ Ø®Ø·Ø§ÛŒ Â«Ø¯Ùˆ Ù†Ù…ÙˆÙ†Ù‡ Ø¨Ø§ Ù‡Ù…Ø§Ù† Ú©Ù„ÛŒØ¯Â» Ø´Ú©Ø³Øª Ù…ÛŒâ€ŒØ®ÙˆØ±Ø¯.
             var existing = await _dbSet.AsNoTracking()
                 .FirstOrDefaultAsync(c => c.CustomerId == customer.CustomerId);
-            if (existing == null) return (false, "مشتری یافت نشد", null);
+            if (existing == null) return (false, "Ù…Ø´ØªØ±ÛŒ ÛŒØ§ÙØª Ù†Ø´Ø¯", null);
 
             customer.Creationdate = existing.Creationdate;
             var updated = await UpdateAsync(customer);
-            return (true, "مشتری با موفقیت بروزرسانی شد", updated);
+            return (true, "Ù…Ø´ØªØ±ÛŒ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø¨Ø±ÙˆØ²Ø±Ø³Ø§Ù†ÛŒ Ø´Ø¯", updated);
         }
 
         public async Task<(bool Success, string Message)> DeleteCustomerAsync(int id)
         {
             var customer = await GetByIdAsync(id);
-            if (customer == null) return (false, "مشتری یافت نشد");
+            if (customer == null) return (false, "Ù…Ø´ØªØ±ÛŒ ÛŒØ§ÙØª Ù†Ø´Ø¯");
 
-            // رابطه به‌صورت اختیاری تعریف شده و در دیتابیس NO ACTION است، پس
-            // حذف مشتریِ دارای حواله به خطای خام کلید خارجی ختم می‌شود.
-            // پیش از رسیدن به دیتابیس بررسی می‌کنیم تا پیام قابل فهم بدهیم.
+            // Ø±Ø§Ø¨Ø·Ù‡ Ø¨Ù‡â€ŒØµÙˆØ±Øª Ø§Ø®ØªÛŒØ§Ø±ÛŒ ØªØ¹Ø±ÛŒÙ Ø´Ø¯Ù‡ Ùˆ Ø¯Ø± Ø¯ÛŒØªØ§Ø¨ÛŒØ³ NO ACTION Ø§Ø³ØªØŒ Ù¾Ø³
+            // Ø­Ø°Ù Ù…Ø´ØªØ±ÛŒÙ Ø¯Ø§Ø±Ø§ÛŒ Ø­ÙˆØ§Ù„Ù‡ Ø¨Ù‡ Ø®Ø·Ø§ÛŒ Ø®Ø§Ù… Ú©Ù„ÛŒØ¯ Ø®Ø§Ø±Ø¬ÛŒ Ø®ØªÙ… Ù…ÛŒâ€ŒØ´ÙˆØ¯.
+            // Ù¾ÛŒØ´ Ø§Ø² Ø±Ø³ÛŒØ¯Ù† Ø¨Ù‡ Ø¯ÛŒØªØ§Ø¨ÛŒØ³ Ø¨Ø±Ø±Ø³ÛŒ Ù…ÛŒâ€ŒÚ©Ù†ÛŒÙ… ØªØ§ Ù¾ÛŒØ§Ù… Ù‚Ø§Ø¨Ù„ ÙÙ‡Ù… Ø¨Ø¯Ù‡ÛŒÙ….
             var issueCount = await _context.Set<GoodsIssue>()
                 .CountAsync(i => i.CustomerId == id);
 
             if (issueCount > 0)
-                return (false, $"این مشتری {issueCount} حواله دارد و قابل حذف نیست. حواله‌ها را ابتدا بررسی کنید.");
+                return (false, $"Ø§ÛŒÙ† Ù…Ø´ØªØ±ÛŒ {issueCount} Ø­ÙˆØ§Ù„Ù‡ Ø¯Ø§Ø±Ø¯ Ùˆ Ù‚Ø§Ø¨Ù„ Ø­Ø°Ù Ù†ÛŒØ³Øª. Ø­ÙˆØ§Ù„Ù‡â€ŒÙ‡Ø§ Ø±Ø§ Ø§Ø¨ØªØ¯Ø§ Ø¨Ø±Ø±Ø³ÛŒ Ú©Ù†ÛŒØ¯.");
 
             await RemoveAsync(customer);
-            return (true, "مشتری با موفقیت حذف شد");
+            return (true, "Ù…Ø´ØªØ±ÛŒ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø­Ø°Ù Ø´Ø¯");
         }
 
         public async Task<IEnumerable<Customer>> GetPagedAsync(int pageNumber, int pageSize)
         {
-            await DbLock.Semaphore.WaitAsync();
-            try
-            {
-                return await _dbSet
-                    .OrderBy(c => c.Name)
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-            }
-            finally
-            {
-                DbLock.Semaphore.Release();
-            }
+            return await _dbSet
+                .OrderBy(c => c.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
     }
 }

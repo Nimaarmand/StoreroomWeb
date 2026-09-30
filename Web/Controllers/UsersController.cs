@@ -1,4 +1,4 @@
-using Application.Features.Definition.Usermanagement_Service;
+using Application.Features.Definition.UserManagement_Service;
 using Domain.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

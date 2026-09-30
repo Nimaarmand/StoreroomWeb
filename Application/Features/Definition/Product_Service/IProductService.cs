@@ -10,13 +10,13 @@ namespace Application.Features.Definition.Product_Service
     {
         Task<IEnumerable<Product>> GetTopProductsAsync(int count);
 
-        Task<Product> GetProductByIdAsync(Guid productId);
+        Task<Product?> GetProductByIdAsync(Guid productId);
 
         Task<IEnumerable<Product>> GetAllProductsAsync();
 
         Task<IEnumerable<Product>> SearchByNameAsync(string name);
 
-        Task<Product> GetByBarcodeAsync(string barcode);
+        Task<Product?> GetByBarcodeAsync(string barcode);
 
         Task<bool> IsBarcodeExistsAsync(string barcode, Guid? excludeId = null);
 
@@ -30,9 +30,9 @@ namespace Application.Features.Definition.Product_Service
         /// <summary>کالاهایی که تاریخ انقضای آن‌ها گذشته است.</summary>
         Task<IEnumerable<Product>> GetExpiredProductsAsync();
 
-        Task<(bool Success, string Message, Product Product)> CreateProductAsync(Product product);
+        Task<(bool Success, string Message, Product? Product)> CreateProductAsync(Product product);
 
-        Task<(bool Success, string Message, Product Product)> UpdateProductAsync(Product product);
+        Task<(bool Success, string Message, Product? Product)> UpdateProductAsync(Product product);
 
         Task<(bool Success, string Message)> DeleteProductAsync(Guid productId);
 

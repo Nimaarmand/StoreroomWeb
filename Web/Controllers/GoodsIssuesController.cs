@@ -261,9 +261,7 @@ public class GoodsIssuesController : Controller
         var (success, message) = await _issues.ApproveIssueAsync(id, userId);
 
         TempData["Message"] = message;
-        return Redirect(!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
-            ? returnUrl
-            : Url.Action(nameof(Index)));
+        return Redirect(LocalUrl.Resolve(Url, returnUrl, nameof(Index)));
     }
 
     [HttpPost]
@@ -274,9 +272,7 @@ public class GoodsIssuesController : Controller
         var ok = await _issues.CancelIssueAsync(id);
 
         TempData["Message"] = ok ? "حواله لغو شد." : "لغو حواله ناموفق بود.";
-        return Redirect(!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
-            ? returnUrl
-            : Url.Action(nameof(Index)));
+        return Redirect(LocalUrl.Resolve(Url, returnUrl, nameof(Index)));
     }
 
     [HttpGet]

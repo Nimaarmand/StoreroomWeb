@@ -27,3 +27,16 @@ desktop.ini
 *.log
 *.bak
 *.tmp
+
+# اسرار و تنظیمات محلی
+.env
+.env.*
+appsettings.*.local.json
+*.pfx
+*.key
+
+# پایگاه داده محلی
+*.mdf
+*.ldf
+*.db
+*.sqlite

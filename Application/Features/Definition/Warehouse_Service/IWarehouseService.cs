@@ -11,7 +11,7 @@ namespace Application.Features.Definition.Warehouse_Service
     {
         Task<IEnumerable<Warehouse>> GetAllAsync();
 
-        Task<Warehouse> GetByIdAsync(int id);
+        Task<Warehouse?> GetByIdAsync(int id);
 
         Task<Warehouse> AddAsync(Warehouse warehouse);
 
@@ -21,7 +21,7 @@ namespace Application.Features.Definition.Warehouse_Service
 
         Task<IEnumerable<Warehouse>> GetTopWarehousesAsync(int count);
 
-        Task<Warehouse> GetByNameAsync(string name);
+        Task<Warehouse?> GetByNameAsync(string name);
 
         /// <summary>انبارهایی که موجودی آن‌ها به آستانه داده‌شده رسیده یا از آن کمتر است.</summary>
         Task<IEnumerable<Warehouse>> GetLowCapacityWarehousesAsync(int threshold = 10);

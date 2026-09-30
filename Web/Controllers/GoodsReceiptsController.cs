@@ -4,7 +4,7 @@ using Application.Features.Definition.GoodsIssue_Service;
 using Application.Features.Definition.GoodsReceipt_Service;
 using Application.Features.Definition.Product_Service;
 using Application.Features.Definition.Supplier_Service;
-using Application.Features.Definition.Usermanagement_Service;
+using Application.Features.Definition.UserManagement_Service;
 using Application.Features.Definition.Warehouse_Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -295,9 +295,7 @@ public class GoodsReceiptsController : Controller
             return Json(new { success, message });
 
         TempData["Message"] = message;
-        return Redirect(!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
-            ? returnUrl
-            : Url.Action(nameof(Index)));
+        return Redirect(LocalUrl.Resolve(Url, returnUrl, nameof(Index)));
     }
 
     [HttpPost]
@@ -308,9 +306,7 @@ public class GoodsReceiptsController : Controller
         var ok = await _receipts.CancelReceiptAsync(id);
 
         TempData["Message"] = ok ? "رسید لغو شد." : "لغو رسید ناموفق بود.";
-        return Redirect(!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
-            ? returnUrl
-            : Url.Action(nameof(Index)));
+        return Redirect(LocalUrl.Resolve(Url, returnUrl, nameof(Index)));
     }
 
     /// <summary>

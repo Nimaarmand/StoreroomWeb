@@ -1,7 +1,7 @@
 using Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Persistans.Context;
+using Persistence.Context;
 
 namespace Web.Infrastructure;
 
@@ -23,12 +23,18 @@ public static class DbInitializer
         await appContext.Database.MigrateAsync();
 
         await SeedRolesAsync(provider.GetRequiredService<RoleManager<Role>>());
-        await SeedAdminUserAsync(provider.GetRequiredService<UserManager<ApplicationUser>>());
+        await SeedAdminUserAsync(
+            provider.GetRequiredService<UserManager<ApplicationUser>>(),
+            provider.GetRequiredService<IConfiguration>(),
+            provider.GetRequiredService<IWebHostEnvironment>());
 
-        // کاربران نمونه فقط در توسعه ساخته می‌شوند. ساختن آن‌ها در محیط
-        // عملیاتی یعنی داشتن سه حساب با رمز ثابت و قابل حدس.
+        // کاربران و داده‌های نمونه فقط در توسعه ساخته می‌شوند. ساختن آن‌ها در محیط
+        // عملیاتی یعنی داشتن حساب‌هایی با رمز ثابت و قابل حدس.
         if (provider.GetRequiredService<IWebHostEnvironment>().IsDevelopment())
+        {
             await SeedDemoUsersAsync(provider.GetRequiredService<UserManager<ApplicationUser>>());
+            await DemoDataSeeder.SeedAsync(services);
+        }
     }
 
     private static async Task SeedDemoUsersAsync(UserManager<ApplicationUser> userManager)
@@ -81,23 +87,45 @@ public static class DbInitializer
         }
     }
 
-    private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
+    /// <summary>
+    /// ساخت کاربر مدیر در اولین اجرا.
+    /// نام کاربری و رمز از پیکربندی خوانده می‌شود تا رمز ثابت داخل کد نماند.
+    /// در محیط عملیاتی، نبود این تنظیمات یک خطاست نه یک هشدار: ساخت خودکار
+    /// مدیر با رمز پیش‌فرضِ شناخته‌شده، عملاً دسترسی کامل به سیستم را عمومی می‌کند.
+    /// </summary>
+    private static async Task SeedAdminUserAsync(
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         const string adminUserName = "admin";
-        const string adminPassword = "Admin@123";
 
         if (await userManager.FindByNameAsync(adminUserName) != null)
             return;
 
+        var password = configuration["Seed:AdminPassword"];
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            if (!environment.IsDevelopment())
+                throw new InvalidOperationException(
+                    "تنظیم Seed:AdminPassword تعریف نشده است. آن را با دستور زیر ثبت کنید: " +
+                    "dotnet user-secrets set \"Seed:AdminPassword\" \"<رمز-قوی>\" " +
+                    "(یا به‌عنوان متغیر محیطی Seed__AdminPassword).");
+
+            // فقط در توسعه، تا اولین اجرا بدون تنظیم اضافه ممکن باشد.
+            password = "Admin@123";
+        }
+
         var admin = new ApplicationUser
         {
             UserName = adminUserName,
-            Email = "admin@storeroom.local",
+            Email = configuration["Seed:AdminEmail"] ?? "admin@storeroom.local",
             FullName = "مدیر سیستم",
             EmailConfirmed = true,
         };
 
-        var result = await userManager.CreateAsync(admin, adminPassword);
+        var result = await userManager.CreateAsync(admin, password);
         if (!result.Succeeded)
             throw new InvalidOperationException(
                 "ساخت کاربر مدیر ناموفق بود: " +

@@ -1,0 +1,120 @@
+@model List<GoodsReceiptDto>
+@{
+    ViewData["Title"] = "فاکتور ورودی تأییدشده";
+    var keyword = (string?)ViewData["Keyword"];
+    var days = (int)(ViewData["Days"] ?? 30);
+    var total = Model.Sum(r => r.NetPrice);
+    var totalQty = Model.Sum(r => r.Quantity);
+}
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">
+            <span class="page-title-icon"><i class="bi bi-box-arrow-in-down"></i></span>
+            فاکتور ورودی تأییدشده
+            <span class="page-count num">@PersianDate.Digits(Model.Count.ToString())</span>
+        </h1>
+        <div class="page-sub">
+            <i class="bi bi-info-circle"></i>
+            فقط اسنادی نمایش داده می‌شوند که تأیید شده‌اند و موجودی را جابه‌جا کرده‌اند.
+        </div>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" asp-controller="GoodsReceipts" asp-action="Index">
+        <i class="bi bi-arrow-return-right"></i> بازگشت به رسیدها
+    </a>
+</div>
+
+<form method="get" class="app-toolbar">
+    <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-5">
+            <label class="form-label" for="keyword">جست‌وجو</label>
+            <div class="app-search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="keyword" name="keyword" value="@keyword"
+                       placeholder="شماره فاکتور، کالا یا تأمین‌کننده" />
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label" for="days">بازه زمانی</label>
+            <select class="form-select" id="days" name="days">
+                <option value="7" selected="@(days == 7)">۷ روز اخیر</option>
+                <option value="30" selected="@(days == 30)">۳۰ روز اخیر</option>
+                <option value="90" selected="@(days == 90)">۹۰ روز اخیر</option>
+                <option value="365" selected="@(days == 365)">یک سال اخیر</option>
+                <option value="0" selected="@(days == 0)">همه</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> اعمال</button>
+            @if (!string.IsNullOrWhiteSpace(keyword) || days != 30)
+            {
+                <a class="btn btn-outline-secondary" asp-action="Incoming">بازنشانی</a>
+            }
+        </div>
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <div class="card">
+        <div class="app-empty">
+            <div class="app-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
+            <div class="fw-semibold text-dark">فاکتور ورودی تأییدشده‌ای در این بازه وجود ندارد</div>
+            <div class="small">بازه زمانی را تغییر دهید یا رسیدهای در انتظار تأیید را بررسی کنید.</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card app-table-card">
+        <div class="app-table-wrap">
+            <table class="table table-hover align-middle">
+                <colgroup>
+                    <col style="width:14%" /><col style="width:15%" /><col style="width:14%" /><col style="width:12%" />
+                    <col style="width:9%" /><col style="width:14%" /><col style="width:12%" /><col style="width:10%" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>شماره فاکتور</th>
+                        <th>کالا</th>
+                        <th>تأمین‌کننده</th>
+                        <th>انبار</th>
+                        <th class="text-center">تعداد</th>
+                        <th class="text-center">مبلغ کل</th>
+                        <th>تاریخ</th>
+                        <th class="text-center">چاپ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold num" style="text-align:right">@(string.IsNullOrWhiteSpace(r.InvoiceNumber) ? "—" : r.InvoiceNumber)</td>
+                            <td>@r.ProductName</td>
+                            <td>@(string.IsNullOrWhiteSpace(r.SupplierName) ? "—" : r.SupplierName)</td>
+                            <td class="text-muted-2">@(string.IsNullOrWhiteSpace(r.WarehouseName) ? "—" : r.WarehouseName)</td>
+                            <td class="text-center">
+                                <span class="num fw-semibold">@PersianDate.Digits(r.Quantity.ToString())</span>
+                                <span class="small text-muted-2">@r.Unit</span>
+                            </td>
+                            <td class="text-center num">@PersianNumberConverter.ToPersianDigits(r.NetPrice.ToString("N0"))</td>
+                            <td class="small text-muted-2">@PersianDate.ToPersianDate(r.ReceiptDate)</td>
+                            <td class="text-center col-actions">
+                                <a class="btn btn-outline-primary btn-sm" asp-action="PrintIncoming" asp-route-id="@r.ReceiptId">
+                                    <i class="bi bi-printer"></i> چاپ
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="app-table-foot">
+            <span><i class="bi bi-inboxes"></i> جمع @PersianDate.Digits(totalQty.ToString()) عدد کالا</span>
+            <span>
+                جمع کل فاکتورها:
+                <strong class="num text-dark">@PersianNumberConverter.ToPersianDigits(total.ToString("N0"))</strong>
+            </span>
+        </div>
+    </div>
+}

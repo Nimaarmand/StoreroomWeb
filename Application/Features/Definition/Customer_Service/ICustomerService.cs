@@ -12,13 +12,13 @@ namespace Application.Features.Definition.Customer_Service
 
         Task<IEnumerable<Customer>> SearchByNameAsync(string name);
 
-        Task<Customer> GetByPhoneAsync(string phone);
+        Task<Customer?> GetByPhoneAsync(string phone);
 
         Task<bool> IsNameExistsAsync(string name, int? excludeId = null);
 
-        Task<(bool Success, string Message, Customer Customer)> CreateCustomerAsync(Customer customer);
+        Task<(bool Success, string Message, Customer? Customer)> CreateCustomerAsync(Customer customer);
 
-        Task<(bool Success, string Message, Customer Customer)> UpdateCustomerAsync(Customer customer);
+        Task<(bool Success, string Message, Customer? Customer)> UpdateCustomerAsync(Customer customer);
 
         Task<(bool Success, string Message)> DeleteCustomerAsync(int id);
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entity
@@ -8,7 +8,7 @@ namespace Domain.Entity
     {
         
         [MaxLength(50)]
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
     }

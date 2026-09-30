@@ -1,0 +1,119 @@
+@model InvoicePrintModel
+@{
+    Layout = null;
+    ViewData["Title"] = Model.Title;
+}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
+    <title>@Model.Title</title>
+    <style>
+        /* قالب چاپ عمداً مستقل از Layout است تا بدون منو و فوتر روی کاغذ تمیز چاپ شود. */
+        body { font-family: Tahoma, "Iranian Sans", sans-serif; direction: rtl; color: #000; margin: 24px; font-size: 12pt; }
+        h1 { font-size: 15pt; text-align: center; margin: 0 0 4px; }
+        .meta { text-align: center; color: #555; font-size: 9pt; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th, td { border: 1px solid #444; padding: 6px 8px; }
+        th { background: #eee; text-align: right; font-weight: bold; }
+        .num { text-align: center; white-space: nowrap; }
+        .total-row td { background: #f4f4f4; font-weight: bold; }
+        .signatures { display: flex; justify-content: space-between; margin-top: 48px; font-size: 10pt; }
+        .signatures div { width: 45%; border-top: 1px solid #000; padding-top: 4px; text-align: center; }
+        .muted { color: #555; }
+        /* این صفحه Bootstrap بارگیری نمی‌کند، پس دکمه‌ها استایل درون‌خطی دارند. */
+        .no-print button {
+            font: inherit;
+            font-size: 10pt;
+            padding: 6px 14px;
+            margin-inline-end: 6px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #fff;
+            color: #000;
+            cursor: pointer;
+        }
+        .no-print button.primary { background: #1f2a44; border-color: #1f2a44; color: #fff; }
+        @@media print {
+            .no-print { display: none; }
+            body { margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="text-align:left; margin-bottom:12px">
+        <button type="button" class="primary" onclick="window.print()">چاپ</button>
+        <button type="button" onclick="history.back()">بازگشت</button>
+    </div>
+
+    <h1>@Model.Title</h1>
+    <div class="meta">
+        شماره: <span dir="ltr">@(string.IsNullOrWhiteSpace(Model.Number) ? "—" : Model.Number)</span>
+        &nbsp;|&nbsp;
+        تاریخ: @PersianDate.ToPersianDate(Model.Date)
+    </div>
+
+    <table>
+        <tbody>
+            <tr>
+                <th style="width: 18%">کالا</th>
+                <td>@Model.ProductName</td>
+                <th style="width: 18%">انبار</th>
+                <td>@(string.IsNullOrWhiteSpace(Model.Warehouse) ? "—" : Model.Warehouse)</td>
+            </tr>
+            <tr>
+                <th>طرف معامله</th>
+                <td>@(string.IsNullOrWhiteSpace(Model.Counterparty) ? "—" : Model.Counterparty)</td>
+                <th>تأییدکننده</th>
+                <td>@(string.IsNullOrWhiteSpace(Model.ApprovedBy) ? "—" : Model.ApprovedBy)</td>
+            </tr>
+            @if (!string.IsNullOrWhiteSpace(Model.Note))
+            {
+                <tr>
+                    <th>نوع سند</th>
+                    <td colspan="3">@Model.Note</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <table>
+        <thead>
+            <tr>
+                <th>شرح کالا</th>
+                <th class="num" style="width: 12%">تعداد</th>
+                <th style="width: 8%">واحد</th>
+                <th class="num" style="width: 16%">قیمت واحد</th>
+                <th class="num" style="width: 18%">مبلغ کل</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@Model.ProductName</td>
+                <td class="num">@PersianNumberConverter.ToPersianDigits(Model.Quantity.ToString("N0"))</td>
+                <td class="num">@Model.Unit</td>
+                <td class="num">@PersianNumberConverter.ToPersianDigits(Model.UnitPrice.ToString("N0"))</td>
+                <td class="num">@PersianNumberConverter.ToPersianDigits(Model.Total.ToString("N0"))</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="4">جمع کل</td>
+                <td class="num">@PersianNumberConverter.ToPersianDigits(Model.Total.ToString("N0"))</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <p><strong>توضیحات:</strong> @Model.Description</p>
+    }
+
+    <div class="signatures">
+        <div>امضای فروشنده / تأمین‌کننده</div>
+        <div>امضای خریدار / دریافت‌کننده</div>
+    </div>
+</body>
+</html>

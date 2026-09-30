@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations;
 using Domain.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -39,13 +38,13 @@ public class AccountController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        // حساب غیرفعال باید نتواند وارد شود. این بررسی قبل از PasswordSignInAsync
-        // انجام می‌شود تا نتیجه به کاربر لو نرود که رمز درست است یا نه، و در
-        // نتیجه PasswordSignInAsync هم دوباره انجام نمی‌شود.
+        // Ø­Ø³Ø§Ø¨ ØºÛŒØ±ÙØ¹Ø§Ù„ Ø¨Ø§ÛŒØ¯ Ù†ØªÙˆØ§Ù†Ø¯ ÙˆØ§Ø±Ø¯ Ø´ÙˆØ¯. Ø§ÛŒÙ† Ø¨Ø±Ø±Ø³ÛŒ Ù‚Ø¨Ù„ Ø§Ø² PasswordSignInAsync
+        // Ø§Ù†Ø¬Ø§Ù… Ù…ÛŒâ€ŒØ´ÙˆØ¯ ØªØ§ Ù†ØªÛŒØ¬Ù‡ Ø¨Ù‡ Ú©Ø§Ø±Ø¨Ø± Ù„Ùˆ Ù†Ø±ÙˆØ¯ Ú©Ù‡ Ø±Ù…Ø² Ø¯Ø±Ø³Øª Ø§Ø³Øª ÛŒØ§ Ù†Ù‡ØŒ Ùˆ Ø¯Ø±
+        // Ù†ØªÛŒØ¬Ù‡ PasswordSignInAsync Ù‡Ù… Ø¯ÙˆØ¨Ø§Ø±Ù‡ Ø§Ù†Ø¬Ø§Ù… Ù†Ù…ÛŒâ€ŒØ´ÙˆØ¯.
         var candidate = await _userManager.FindByNameAsync(model.UserName);
         if (candidate is { IsActive: false })
         {
-            ModelState.AddModelError(string.Empty, "این حساب غیرفعال شده است. با مدیر سامانه تماس بگیرید.");
+            ModelState.AddModelError(string.Empty, "Ø§ÛŒÙ† Ø­Ø³Ø§Ø¨ ØºÛŒØ±ÙØ¹Ø§Ù„ Ø´Ø¯Ù‡ Ø§Ø³Øª. Ø¨Ø§ Ù…Ø¯ÛŒØ± Ø³Ø§Ù…Ø§Ù†Ù‡ ØªÙ…Ø§Ø³ Ø¨Ú¯ÛŒØ±ÛŒØ¯.");
             return View(model);
         }
 
@@ -54,8 +53,8 @@ public class AccountController : Controller
 
         if (result.Succeeded)
         {
-            // غیرفعال کردن کاربر باید نشست باز او را هم ببندد، وگرنه تا پایان
-            // اعتبار کوکی می‌تواند کار کند.
+            // ØºÛŒØ±ÙØ¹Ø§Ù„ Ú©Ø±Ø¯Ù† Ú©Ø§Ø±Ø¨Ø± Ø¨Ø§ÛŒØ¯ Ù†Ø´Ø³Øª Ø¨Ø§Ø² Ø§Ùˆ Ø±Ø§ Ù‡Ù… Ø¨Ø¨Ù†Ø¯Ø¯ØŒ ÙˆÚ¯Ø±Ù†Ù‡ ØªØ§ Ù¾Ø§ÛŒØ§Ù†
+            // Ø§Ø¹ØªØ¨Ø§Ø± Ú©ÙˆÚ©ÛŒ Ù…ÛŒâ€ŒØªÙˆØ§Ù†Ø¯ Ú©Ø§Ø± Ú©Ù†Ø¯.
             if (candidate is not null && !candidate.IsActive)
                 await _signInManager.SignOutAsync();
 
@@ -67,17 +66,17 @@ public class AccountController : Controller
         if (result.IsLockedOut)
         {
             ModelState.AddModelError(string.Empty,
-                "حساب شما به دلیل تلاش‌های ناموفق موقتاً قفل شده است. چند دقیقه دیگر تلاش کنید.");
+                "Ø­Ø³Ø§Ø¨ Ø´Ù…Ø§ Ø¨Ù‡ Ø¯Ù„ÛŒÙ„ ØªÙ„Ø§Ø´â€ŒÙ‡Ø§ÛŒ Ù†Ø§Ù…ÙˆÙÙ‚ Ù…ÙˆÙ‚ØªØ§Ù‹ Ù‚ÙÙ„ Ø´Ø¯Ù‡ Ø§Ø³Øª. Ú†Ù†Ø¯ Ø¯Ù‚ÛŒÙ‚Ù‡ Ø¯ÛŒÚ¯Ø± ØªÙ„Ø§Ø´ Ú©Ù†ÛŒØ¯.");
             return View(model);
         }
 
         if (result.IsNotAllowed)
         {
-            ModelState.AddModelError(string.Empty, "این حساب اجازه ورود به سیستم را ندارد.");
+            ModelState.AddModelError(string.Empty, "Ø§ÛŒÙ† Ø­Ø³Ø§Ø¨ Ø§Ø¬Ø§Ø²Ù‡ ÙˆØ±ÙˆØ¯ Ø¨Ù‡ Ø³ÛŒØ³ØªÙ… Ø±Ø§ Ù†Ø¯Ø§Ø±Ø¯.");
             return View(model);
         }
 
-        ModelState.AddModelError(string.Empty, "نام کاربری یا رمز عبور نادرست است.");
+        ModelState.AddModelError(string.Empty, "Ù†Ø§Ù… Ú©Ø§Ø±Ø¨Ø±ÛŒ ÛŒØ§ Ø±Ù…Ø² Ø¹Ø¨ÙˆØ± Ù†Ø§Ø¯Ø±Ø³Øª Ø§Ø³Øª.");
         return View(model);
     }
 
@@ -94,7 +93,7 @@ public class AccountController : Controller
     [AllowAnonymous]
     public IActionResult AccessDenied()
     {
-        ViewData["Title"] = "دسترسی مجاز نیست";
+        ViewData["Title"] = "Ø¯Ø³ØªØ±Ø³ÛŒ Ù…Ø¬Ø§Ø² Ù†ÛŒØ³Øª";
         return View();
     }
 }

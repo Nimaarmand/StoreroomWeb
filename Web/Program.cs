@@ -6,22 +6,21 @@ using Application.Features.Definition.GoodsIssue_Service;
 using Application.Features.Definition.GoodsReceipt_Service;
 using Application.Features.Definition.Product_Service;
 using Application.Features.Definition.Supplier_Service;
-using Application.Features.Definition.Usermanagement_Service;
+using Application.Features.Definition.UserManagement_Service;
 using Application.Features.Definition.Warehouse_Service;
 using Application.Features.Implementation.Category_Service;
-using Application.Features.Implementation.Common;
 using Application.Features.Implementation.Customer_Service;
 using Application.Features.Implementation.GenericRepository_Service;
 using Application.Features.Implementation.GoodsIssue_Service;
 using Application.Features.Implementation.GoodsReceipt_Service;
 using Application.Features.Implementation.Product_Service;
 using Application.Features.Implementation.Supplier_Service;
-using Application.Features.Implementation.Usermanagement_Service;
+using Application.Features.Implementation.UserManagement_Service;
 using Application.Features.Implementation.Warehouse_Service;
 using Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Persistans.Context;
+using Persistence.Context;
 using Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -127,9 +126,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // کلاس‌های concrete ندارند تا تست و جایگزینی ساده باشد.
 // ============================================================
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IDbLock, DbLock>();
 
-builder.Services.AddScoped<IUserManagement, UsermanagementService>();
+builder.Services.AddScoped<IUserManagement, UserManagementService>();
 builder.Services.AddScoped<IWarehouseService, WarehouseService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();

@@ -1,3 +1,14 @@
+/* فونت وزیرمتن به‌صورت محلی در wwwroot/lib/vazirmatn قرار دارد تا بارگذاری
+   صفحه به اینترنت وابسته نباشد. نام خانواده دقیقاً با font-family پایین یکی است. */
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../lib/vazirmatn/fonts/Vazirmatn-var.woff2") format("woff2-variations"),
+         url("../lib/vazirmatn/fonts/Vazirmatn-var.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
     font-family: "Vazirmatn", "IRANSans", "Segoe UI", Tahoma, sans-serif;
     font-size: 14px;

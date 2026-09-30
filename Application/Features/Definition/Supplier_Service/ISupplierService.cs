@@ -10,13 +10,13 @@ namespace Application.Features.Definition.Supplier_Service
     {
         Task<IEnumerable<Supplier>> GetTopSuppliersAsync(int count);
 
-        Task<Supplier> GetByNameAsync(string name);
+        Task<Supplier?> GetByNameAsync(string name);
 
-        Task<Supplier> GetByEconomicCodeAsync(string economicCode);
+        Task<Supplier?> GetByEconomicCodeAsync(string economicCode);
 
         Task<IEnumerable<Supplier>> SearchAsync(string keyword);
 
-        Task<bool> IsPhoneDuplicateAsync(string phone, int? excludeSupplierId = null);
+        Task<bool> IsPhoneDuplicateAsync(string? phone, int? excludeSupplierId = null);
 
         /// <summary>تامین‌کنندگانی که کد اقتصادی دارند.</summary>
         Task<IEnumerable<Supplier>> GetWithEconomicCodeAsync();

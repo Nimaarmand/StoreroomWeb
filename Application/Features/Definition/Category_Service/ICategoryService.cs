@@ -12,7 +12,7 @@ namespace Application.Features.Definition.Category_Service
 
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
 
-        Task<Category> GetCategoryByIdAsync(int id);
+        Task<Category?> GetCategoryByIdAsync(int id);
 
         /// <summary>دسته‌بندی‌های سطح بالا (بدون والد).</summary>
         Task<IEnumerable<Category>> GetRootCategoriesAsync();
@@ -26,9 +26,9 @@ namespace Application.Features.Definition.Category_Service
         /// <summary>بررسی اینکه والد انتخاب‌شده معتبر است و باعث حلقه در درخت نمی‌شود.</summary>
         Task<bool> IsValidParentCategoryAsync(int? parentId, int? currentCategoryId = null);
 
-        Task<(bool Success, string Message, Category Category)> CreateCategoryAsync(Category category);
+        Task<(bool Success, string Message, Category? Category)> CreateCategoryAsync(Category category);
 
-        Task<(bool Success, string Message, Category Category)> UpdateCategoryAsync(Category category);
+        Task<(bool Success, string Message, Category? Category)> UpdateCategoryAsync(Category category);
 
         /// <summary>در صورتی که زیردسته داشته باشد، حذف انجام نمی‌شود.</summary>
         Task<(bool Success, string Message)> DeleteCategoryAsync(int id);
